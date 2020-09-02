@@ -12,7 +12,11 @@ library(geonames)
 #https://geocoder.readthedocs.io/providers/GeoNames.html on Python
 #http://geonames.r-forge.r-project.org/
 
-options(geonamesUsername = "xxx")
+# [IMPORTANT] add your geonames id here
+# options(geonamesUsername = "your_geonames_user")
+
+options(geonamesUsername = getOption("geonamesUsername"))
+
 
 ############################################################################################################################
 
@@ -42,8 +46,7 @@ countrydf <- "data/geonames-countries.tsv"
 
 if (!file.exists(countrydf)) {
 
-countrydf <-
-  country %>%
+country %>%
   split(.$country) %>%
   map( ~ GNsearch(name = .x$country, featureCode = "PCLI", fuzzy = 1)) %>%
   compact() %>%
@@ -52,19 +55,14 @@ countrydf <-
   rename(ISO2 = countryCode,
          countryname = countryName) %>%
   select(country_src, countryname, ISO2)%>%
-  distinct()%>%
-  # write_rds(countrydf, "data/geonames-countries.rds")
-  write_tsv(countrydf, "data/geonames-countries.tsv")
+  distinct() %>%
+  write_tsv("data/geonames-countries.tsv")
+# write_rds("data/geonames-countries.rds")
 
   }
 
-# countrydf <- read_rds("data/geonames-countries.rds")
-countrydf <- read_tsv("data/geonames-countries.tsv") %>%
-             mutate(countryname = na_if(countryname, "data/geonames-countries.tsv")) %>% # issue: how can I avoid this?
-             mutate(ISO2 = na_if(ISO2, "data/geonames-countries.tsv"))
-
 # focus on the subset of ambiguous cases
-ambiguous <- countrydf %>%
+ambiguous <- read_tsv(countrydf) %>%
   drop_na(countryname) %>%
   group_by(country_src) %>%
   filter(n()>1) %>%

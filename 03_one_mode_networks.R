@@ -79,7 +79,7 @@ for (y in unique(d$year)) {
   cat("\nYear", y, ":", igraph::components(n)$no, "components\n")
   print(table(V(n)$color))
 
-  ggraph(n, layout = "stress") +
+  ggraph(n, layout = "stress", bb = 20) + # set the bbox to 15 for the 2019 graph
     geom_edge_link(aes(alpha = weight), show.legend = FALSE) +
     geom_node_point(aes(size = size, color = color), alpha = 2/3) +
     scale_color_manual("", values = c("P1" = "steelblue3", "P2+" = "tomato3"), labels = l) +
