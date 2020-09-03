@@ -12,6 +12,7 @@ library(tidyr) # for unite, separate
 library(igraph)
 library(ggraph)
 library(graphlayouts)
+library(tidyverse)
 
 
 # [NOTE] we use a stress majorization layout because all graphs have several
@@ -51,7 +52,7 @@ stopifnot(colSums(m) > 1) # # 2015 - 2019 --> issue: Erreur : colSums(m) > 1 ne 
 
 # weight = 1 / (total number of panel participants)
    w <- apply(m, 2, function(x) { x / sum(x) }) # \in (0, 0.5] # for bipartite plots
- # w <- m # for backbones
+#  w <- m # for backbones
 
 # ==============================================================================
 # BIPARTITE NETWORK PLOTS

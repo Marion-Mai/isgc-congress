@@ -77,7 +77,7 @@ ambiguous <- read_tsv(countrydf) %>%
   rename(ISO2_dest = ISO2, country_dest = countryname)
 
 # fix ambiguous cases
-countrydfclean <- countrydf %>%
+countrydfclean <- read_tsv(countrydf) %>%
   left_join(ambiguous, by = "country_src") %>%
   mutate(
     ISO2_dest = ifelse(country_src != "WA", coalesce(ISO2_dest, ISO2), NA),
@@ -95,7 +95,7 @@ countrydf2 <- "data/geonames-countries-2.tsv"
 if (!file.exists(countrydf2)) {
 
 # search for unfound countries with geonames (fuzzy search autorised)
-countrydf2 <- unfoundr %>%
+unfoundr %>%
   split(.$country_src) %>% #country_src
   map( ~ GNsearch(name = .x$country_src, featureCode = "PCLI", featureCode = "ADM1", fuzzy = 0)) %>% #country_src
   compact() %>%
@@ -105,18 +105,13 @@ countrydf2 <- unfoundr %>%
          countryname = countryName) %>%
   select(country_src, countryname, ISO2)%>%
   distinct() %>%
-  # write_rds(countrydf2, "data/geonames-countries-2.rds")
-  write_tsv(countrydf2, "data/geonames-countries-2.tsv")
+  write_tsv("data/geonames-countries-2.tsv")
+# write_rds("data/geonames-countries-2.rds")
 
   }
 
-# countrydf2 <- read_rds("data/geonames-countries-2.rds")
-countrydf2 <- read_tsv("data/geonames-countries-2.tsv") %>%
-  mutate(countryname = na_if(countryname, "data/geonames-countries-2.tsv")) %>% # issue: how to avoid having to do this?
-  mutate(ISO2 = na_if(ISO2, "data/geonames-countries-2.tsv"))
-
 # fix ambiguous cases
-rclean <- countrydf2 %>% filter(!country_src %in% c("CEDEX", "FR", "MILANO")) %>% # check "GERMANY/FRANCE" - one lines for two addresses -->
+rclean <- read_tsv(countrydf2) %>% filter(!country_src %in% c("CEDEX", "FR", "MILANO")) %>% # check "GERMANY/FRANCE" - one lines for two addresses -->
                                                                                   # I later include two rows in the recipe table: GERMANY/FRANCE --> GERMANY and GERMANY/FRANCE --> FRANCE
   group_by(country_src) %>%
   slice(ifelse(!(country_src %in% c("MADRID", "N IRELAND, UK", "TAIWAN, R.O.C.", "THE NETHERLAND", "WA")), 1,
@@ -196,7 +191,6 @@ citiesdf <- "data/geonames-cities.rds"
 
 if (!file.exists(citiesdf)) {
 
-citiesdf <-
   cities %>%
   split(.$city) %>%
   map( ~ GNsearch(name = .x$city, country = .x$ISO2_dest, featureClass = "P", fuzzy = 1)) %>%
@@ -214,5 +208,5 @@ citiesdf <-
 
   }
 
-citiesdf <- read_rds("data/geonames-cities.rds")
+citiesdf <- read_rds(citiesdf)
 
