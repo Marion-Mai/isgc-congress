@@ -46,6 +46,8 @@ colSums(m) # number of persons per panel
 
 stopifnot(colSums(m) > 1) # # 2015 - 2019 --> issue: Erreur : colSums(m) > 1 ne sont pas TRUE
 
+# I need to check which session includes only 1 person: apparently it is session 2015_30_1
+
 # ==============================================================================
 # SIMPLE INVERSE WEIGHTING
 # ==============================================================================

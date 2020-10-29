@@ -9,7 +9,7 @@
 
 # Domagalski, R., Neal, Z. P., & Sagan, B. (2019). backbone: An R package for backbone extraction of weighted graphs. arXiv:1912.12779v1.
 # https://arxiv.org/pdf/1912.12779.pdf
-# 
+#
 # Neal, Z. P. (2014). The backbone of bipartite networks: Inferring relationships from co-authorship, co-sponsorship, co-attendance and other co-behaviors. Social Networks, 39, 84 – 97. https://doi.org/10.1016/j.socnet.2014.06.001
 
 
@@ -31,16 +31,57 @@ for (i in ls(pattern = "^a\\d{4}")) {
 
   # one-mode projection
   G <- A %*% t(A)
-  diag(G) <- 0
+#  diag(G) <- 0 # not necessary according to Neal et al. replicationcode.R (https://osf.io/r9gvh/)
   print(table(G))
 
-  # backbone from one-mode and two-mode projections
+  # backbone from one-mode and two-mode projections - universal threshold method
   bb <- backbone::universal(G, upper = 1)
   bb2 <- backbone::universal(A, upper = 1, bipartite = TRUE)
-  stopifnot(all.equal(bb$backbone, bb2$backbone))
+  stopifnot(all.equal(bb$backbone, bb2$backbone)) # what it's for?
 
   assign(str_replace(i, "a", "bb"), bb)
   print(bb$summary)
+
+  # backbone from two-mode projections - hypergeometric method
+  ## Extract
+  hyperg_probs <- hyperg(G)
+  hyperg_bb <- backbone.extract(hyperg_probs, alpha = .01)
+
+  # assign(str_replace(i, "a", "bb"), hyperg_bb)
+  # print(hyperg_bb$summary)
+
+  # backbone from two-mode projections - sdsm method
+  ## Extract
+  sdsm <- sdsm(G, model = "polytope")
+  sdsm_bb <- backbone.extract(sdsm, alpha = .01, narrative = F)
+
+  # assign(str_replace(i, "a", "bb"), sdsm_bb)
+  # print(sdsm_bb$summary)
+
+  # backbone from two-mode projections - sdsm method
+  ## Extract
+  sdsm <- sdsm(G, model = "polytope")
+  sdsm_bb <- backbone.extract(sdsm, alpha = .01, narrative = F)
+
+  # assign(str_replace(i, "a", "bb"), sdsm_bb)
+  # print(sdsm_bb$summary)
+
+  # backbone from two-mode projections - fdsm method
+  ## Extract
+  fdsm <- fdsm(G, trials = 1000, dyad = c("PRINCE, AMANIAMPONG", "ANA M, FERREIRA"), progress = TRUE)
+  fdsm_bb <- backbone.extract(fdsm, signed = TRUE, alpha = 0.01)
+
+  # assign(str_replace(i, "a", "bb"), fdsm_bb)
+  # print(fdsm_bb$summary)
+
+  ## Visualize histogram
+  hist(fdsm$dyad_values,
+       freq = FALSE,
+       xlab = "Expected Number of Co-attendance under FDSM",
+       main = NA,
+       col = "gray",
+       ylim=c(0,.08))
+  lines(density(fdsm$dyad_values))
 
   # get graph as tibble
   G_df <- igraph::graph_from_adjacency_matrix(G, diag = FALSE) %>%
