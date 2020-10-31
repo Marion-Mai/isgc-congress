@@ -55,7 +55,8 @@ dim(G)
 G[1:5, 1:2]
 G["PRINCE, AMANIAMPONG", "ANA M, FERREIRA"]
 G["FRANCOIS, JEROME", "ERIC, MONFLIER"]
-
+G["PEDRO, ROCHA FILHO", "MARINA, OLIVEIRA"]
+G["PEDRO, ROCHA FILHO", "CARLOS, FERNANDEZ"]
 
 #### Universal Threshold Set at 0 ####
 ## Extract
@@ -122,7 +123,7 @@ plot(sdsm_bb_viz,
 
 #### Fixed Degree Sequence Model (FDSM) ####
 ## Extract
-fdsm <- fdsm(a2017, trials = 1000, dyad = c("ANA M, FERREIRA", "PRINCE, AMANIAMPONG"), progress = TRUE)
+fdsm <- fdsm(a2017, trials = 1000, dyad = c("PEDRO, ROCHA FILHO", "MARINA, OLIVEIRA"), progress = TRUE)
 fdsm_bb <- backbone.extract(fdsm, signed = TRUE, alpha = 0.01)
 
 ## Visualize histogram
@@ -141,5 +142,19 @@ plot(fdsm_bb_viz,
      vertex.size = 3,
      vertex.frame.color = NA,
      vertex.label = NA,
+     edge.color = E(fdsm_bb_viz)$color,
+     layout = layout_with_gem)
+
+g <- graph_from_adjacency_matrix(fdsm_bb, mode = "undirected", diag = FALSE)
+components(g)
+V(g)$degree <- degree(g)
+gtop <- induced.subgraph(g,v = V(g)$degree > 0)
+
+plot(gtop,
+     vertex.color = V(gtop)$color,
+     vertex.size = 3,
+     vertex.frame.color = NA,
+     vertex.label = word(str_to_lower(V(gtop)$name), -1),
+     vertex.label.cex = 0.6,
      edge.color = E(fdsm_bb_viz)$color,
      layout = layout_with_fr)
