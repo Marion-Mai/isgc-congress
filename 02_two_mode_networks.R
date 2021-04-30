@@ -90,6 +90,10 @@ for (i in rev(y)) {
   cat("\nEdge weights:\n")
   print(summary(E(n)$weight))
 
+  assign(paste("components", i, sep= "_"), igraph::components(n)$no)
+  assign(paste("t", i, sep = "_"), table(V(n)$type))
+  assign(paste("p", i, sep = "_"), sum(V(n)$type != "P0"))
+
   V(n)$size <- igraph::degree(n)
   V(n)$size <- if_else(V(n)$type == "P0", 1.5, V(n)$size)
 
@@ -127,6 +131,12 @@ for (i in rev(y)) {
 
 readr::write_rds(w, "data-net/incidence_matrix.rds")
 
+t <- bind_rows(t_2015, t_2017, t_2019)
+t_c <- rbind(components_2015, components_2017, components_2019)
+t_p <- rbind(p_2015, p_2017, p_2019)
+t <- bind_cols(year = seq(2015, 2019, by = 2), t, C = t_c, P = t_p)
+
+readr::write_tsv(t, "data-net/table.tsv")
 
 #Year 2015 : 9 components
 
