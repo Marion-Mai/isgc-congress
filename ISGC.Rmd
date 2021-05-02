@@ -3,8 +3,8 @@ title: "ISGC"
 author: "Marion Maisonobe"
 date: "30/04/2021"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 always_allow_html: yes
 ---
 
@@ -24,6 +24,8 @@ library(tnet)
 library(igraph)
 library(ggraph)
 library(RColorBrewer)
+library(circlize)
+library(cartography)
 
 abstracts <- read_tsv("data/abstracts-2015-2019.tsv")
 authors_abstracts <- read_tsv("data-net/edges-2015-2019.tsv")
@@ -70,7 +72,7 @@ tab_1 <- ocfc %>%
 
 ```
 
-We first look at the topics associated to flash and oral communications given at the ISGC congress over time. We notice that `r tab_1$topic_1[1]` is the more popular topic. It attracted `r tab_1$n_2019[1]` communications at the 2019 edition. However, we notice that certain topics are not represented at every ISGC editions. It is notably the case of `r tab_1$topic_1[1]` which was not present at the 2017 edition. During the 2017 edition, it appears that `r tab_1$topic_1[1]` has been temporarily remplaced by another category named `r tab_1$topic_1[2]` (see Table 1 below).
+We first look at the topics associated to flash and oral communications given at the ISGC congress over time. We notice that `r tab_1$topic_1[1]` is the more popular topic. It attracted `r tab_1$n_2019[1]` communications at the 2019 edition. However, we notice that certain topics are not represented at every ISGC editions. It is notably the case of `r tab_1$topic_1[1]` which was not present at the 2017 edition. During the 2017 edition, it appears that `r tab_1$topic_1[1]` has been temporarily replaced by another category named `r tab_1$topic_1[2]` (see Table 1 below).
 
 ```{r , echo = FALSE, message = F, warning = F}
 tab_1 %>% # add_row = unsatisfying solution
@@ -87,7 +89,7 @@ tab_1 %>% # add_row = unsatisfying solution
 
 ```
 
-According to François Jérôme, the main organiser of the ISGC conference, it is possible to associate certain similar topics so that we can better analyse trends in the popularity of ISGC topics over time. I refer to François Jérôme's suggestions to decide which topics can be grouped together on the basis of their similarity. Following this operation, we obtain 16 unique topics.
+According to François Jérôme, the main organiser of the ISGC conference, it is possible to associate certain similar topics so that we can better analyse trends in the popularity of ISGC topics over time. I refer to his suggestions to decide which topics can be grouped together on the basis of their similarity. Following this operation, we obtain 16 unique topics.
 
 ```{r , echo = FALSE, message = F, warning = F}
 
@@ -106,6 +108,15 @@ tab_2 <- tab_1 %>%
          group_by(topic_1) %>% 
          summarise(across(where(is.numeric), sum)) %>%
          arrange(-total_nb)
+
+# Copy the URL of the html window you get
+# load webshot library
+# library(webshot)
+
+#install phantom:
+# webshot::install_phantomjs()
+# Make a webshot in pdf : high quality but can not choose printed zone
+# webshot("plots/table1.html" , "plots/table.pdf", delay = 0.2)
 
 # write_tsv(tab_2, "data/topic.tsv")
 
@@ -148,7 +159,7 @@ ggplot(allu_1,
 
 ```
 
-We observe that 4 topics are present at each edition of the congress: Biomass conversion, Polymers, Alternative solvents, and New technologies. The 8 remaining topics are only present at one or two editions.
+We observe that 4 topics are present at each edition of the congress: Biomass conversion (named "Renewable Carbon" at the 2017 Edition), Polymers, Alternative solvents, and New technologies. The 8 remaining topics are only present at one or two editions.
 
 ## Participation
 
@@ -283,11 +294,22 @@ include_graphics("plots/congres-isgc2019-1mode.png")
 
 ```{r ,  echo = FALSE, message = F, warning = F}
 
-d <- left_join(d, select(abstracts, Idu, topic_1), by = "Idu" ) %>%
+f <- left_join(d, select(abstracts, Idu, topic_1), by = "Idu" ) %>%
      group_by(Idu) %>%
-     mutate(a_id = cur_group_id())  %>% ungroup()
+     mutate(a_id = cur_group_id())  %>% ungroup()  %>% 
+     mutate(rtopic = recode(topic_1, "Renewable carbon" = "Biomass conversion", 
+                "Waste valorization" = "Biomass conversion",
+                "Chemical valorization of wastes" = "Biomass conversion",
+                "Catalytic systems" = "Homogenous, heterogenous and biocatalysis",
+                "Polymers and materials" = "Polymers",
+                "Environnemental impact and life cycle assessment" = "Life cycle and environmental assessment",
+                "Atom-economy synthesis" = "Clean reactions",
+                "Eco-technology" = "New technologies",
+                "Alternative technologies" = "New technologies",
+                "Non-thermal activation methods" = "New technologies"
+                ))
 
-net <- select(d, e = a_id, p = idind)  %>% distinct()
+net <- select(f, e = a_id, p = idind)  %>% distinct()
 
 onemode <- projecting_tm(net, method = "sum")
 
@@ -302,8 +324,9 @@ E(g)$weight <- as.double(onemode$w)
 # Remove multiple lines
 g <- simplify(g, remove.multiple = TRUE, edge.attr.comb = c(weight = "first", type = "ignore"))
 
-V(g)$topic <- as.character(d$topic_1[match(V(g)$name, d$a_id)])
-V(g)$year <- as.character(d$year[match(V(g)$name, d$a_id)])
+V(g)$topic <- as.character(f$topic_1[match(V(g)$name, f$a_id)])
+V(g)$rtopic <- as.character(f$rtopic[match(V(g)$name, f$a_id)])
+V(g)$year <- as.character(f$year[match(V(g)$name, f$a_id)])
 V(g)$label <- paste0(V(g)$name, V(g)$year, sep = "_") #
 # V(g)$label <- str_trunc(V(g)$topic, 20, "right") # If necessary add "str_to_title"
 
@@ -317,12 +340,105 @@ We now consider the network of oral and flash communications sharing one author 
 
 colorlist <- c(brewer.pal(9, "Set1")[-6], brewer.pal(8, "Set2")[-7], brewer.pal(12, "Paired")[-11], brewer.pal(12, "Set3")[-c(2, 8, 12)])
 
+plot(g, vertex.label = NA, vertex.size = 1)
+
+```
+
+It counts `r length(V(g))` communications, among which `r length(V(g)[year == "2015"])` from the 2015 edition, `r length(V(g)[year == "2017"])` from the 2017 edition, and `r length(V(g)[year == "2019"])` from the 2019 edition.
+
+```{r ,  echo = FALSE, message = F, warning = F}
+
+# Keep only the links between communications with different topics
+# inspired by https://stackoverflow.com/questions/60279825/calculating-network-statistics-between-attribute-classes-with-igraph-in-r
+
+vattrs <- igraph::vertex_attr(g, name = "topic")
+total_el <- igraph::as_edgelist(g, names = FALSE)
+
+# rows from total_el where the attribute of the edge source == attribute of edge target
+edges_to_rm <- vattrs[total_el[, 1L]] == vattrs[total_el[, 2L]]
+
+# heterophilic communication network in terms of topics
+gh <- subgraph.edges(g, eids = which(!edges_to_rm), delete.vertices = T)
+
+# plot(gh, vertex.label = NA)
+
+```
+
+There are `r length(V(gh))` communications with different topics but at least one common authors. We here consider the original topics' name before the recoding suggested by François Jérôme's expertise. We group all the communications according to their topic and attempt to visualise the relations between topics.
+
+
+```{r ,  echo = FALSE, message = F, warning = F}
+
+contracted_g <- contract.vertices(g,
+                                  mapping = as.integer(as.factor(V(g)$topic)),
+                                  vertex.attr.comb = list(weight = "sum", topic = "first", "ignore"))
+
+# Simplify edges
+gcon <- simplify(contracted_g, remove.multiple = TRUE, remove.loops = FALSE,
+                 edge.attr.comb = "sum")
+
+V(gcon)$name <- V(gcon)$topic # I need to make sure I corectly transfer the topic information to the nodes
+V(gcon)$label <- as_vector(str_remove_all(str_trunc(V(gcon)$name, 16, "right"), "\\."))
+
+# V(gcon)$label <- 1:25
+V(gcon)$name <- V(gcon)$label
+
+# sum(E(gcon)$weight)
+
+el <- get.edgelist(gcon)
+
+df <- data.frame(from = el[,1], to = el[,2], value = as.vector(E(gcon)$weight), stringsAsFactors = F)
+
+#svg(file = "Chord.svg", width = 8, height = 6)
+
+# new plot
+# plot.new()
+
+chordDiagram(df, grid.col = colorlist[1:25], annotationTrack = c("grid"))
+circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
+  xlim = get.cell.meta.data("xlim")
+  ylim = get.cell.meta.data("ylim")
+  sector.name = get.cell.meta.data("sector.index")
+  circos.text(mean(xlim), ylim[1] + .1, sector.name, cex = 0.55, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+}, bg.border = NA)
+
+#circos.info()
+
+#head(df)
+
+# chordDiagram(df, scale = F)
+# circos.clear()
+
+# dev.off()
+
+```
+
+The chord diagram with 25 different topics is not easy to read but it confirms the important link between Biomass conservation and Renawable Carbon that we grouped together in the 16 categories topic variable.
+
+Since certain original topics were only present in certain editions we attempt to visualise the relations between topics using an historical layout. This network is derived from the network of communications having at least one common author.
+
+```{r ,  echo = FALSE, message = F, warning = F}
+
+V(g)$yt <- str_c(V(g)$year, str_remove_all(str_trunc(V(g)$topic, 16, "right"), "\\."), sep = "_")
+
+contracted_g <- contract.vertices(g,
+                                  mapping = as.integer(as.factor(V(g)$yt)),
+                                  vertex.attr.comb = list(weight = "sum", topic = "first", year = "first", yt = "first", rtopic = "first", "ignore"))
+
+# Simplify edges
+gcon <- simplify(contracted_g, remove.multiple = TRUE, remove.loops = T,
+                 edge.attr.comb = "sum")
+
+V(gcon)$name <- V(gcon)$yt # I need to make sure I corectly transfer the topic information to the nodes
+V(gcon)$label <- V(gcon)$topic # as_vector(str_remove_all(str_trunc(V(gcon)$name, 16, "right"), "\\."))
+
 # Prepare the historical layout (not legible at the com level) inspired by the histPlot function in the R package {Bibliometrix}
 
-V(g)$size <- 2
-g <- delete.vertices(g, degree(g)==0)
-dg <- decompose.graph(g)
-layout_m <- create_layout(g, layout = "nicely")
+
+V(gcon)$size <- 2
+gcon <- delete_vertices(gcon, igraph::degree(gcon) == 0)
+dg <- decompose.graph(gcon)
+layout_m <- create_layout(gcon, layout = "nicely")
 layout_m$cluster <- 0
 rr <- 0
 
@@ -335,14 +451,14 @@ for (k in 1:length(dg)) {
   rr <- max(layout_m$y[layout_m$cluster == k])
 }
 
-bsk <- g
-# wp <- membership(cluster_infomap(bsk, modularity = FALSE))
+bsk <- gcon
+wp <- membership(cluster_infomap(bsk, modularity = FALSE))
 layout_m$x <- layout_m$year
 
 # Historical layout (not legible at the com level)
 ghist <- ggraph(layout_m) + 
   geom_edge_arc(width = 1, strength = 0.05, check_overlap = T, edge_alpha = 0.5, color = "grey") + 
-  # geom_node_text(aes(label = V(bsk)$id), size = 5, repel = TRUE, color = colorlist[wp], alpha = 0.8) + 
+  geom_node_text(aes(label = V(bsk)$label), size = 2, repel = TRUE, color = colorlist[wp], alpha = 0.8) + 
   geom_node_point(size = V(bsk)$size, color = colorlist[as.factor(V(bsk)$topic)], alpha = 0.15) + 
   scale_color_brewer() + 
   scale_x_discrete(labels = as.character(seq(2015, 2019, by = 2)),  expand = c(.1, .1)) + # expand = c(.1, .1)
@@ -355,10 +471,117 @@ ghist <- ggraph(layout_m) +
                           panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), 
                           panel.grid.minor.x = element_blank(), axis.text.x = element_text(face = "bold", 
                                                                                            angle = 90, size = 6)) + labs(title = "Historical layout")
-# plot(ghist)
+ plot(ghist)
 
-plot(g, vertex.label = NA)
+# plot(g, vertex.label = NA)
+
 
 ```
 
-It counts `r length(V(g))` communications, among which `r length(V(g)[year == "2015"])` from the 2015 edition, `r length(V(g)[year == "2017"])` from the 2017 edition, and `r length(V(g)[year == "2019"])` from the 2019 edition.
+Let now consider the network of relations between ISGC topics using the list of topics recoded into 16 categories.
+
+```{r ,  echo = FALSE, message = F, warning = F}
+
+contracted_g <- contract.vertices(g,
+                                  mapping = as.integer(as.factor(V(g)$rtopic)),
+                                  vertex.attr.comb = list(weight = "sum", rtopic = "first", "ignore"))
+
+# Simplify edges
+gtop <- simplify(contracted_g, remove.multiple = TRUE, remove.loops = T,
+                 edge.attr.comb = "sum")
+
+V(gtop)$label <- as_vector(str_remove_all(str_trunc(V(gtop)$rtopic, 16, "right"), "\\."))
+
+# plot(gcon, layout = layout_with_gem, vertex.color = colorlist[as.factor(V(gcon)$topic)], edge.width = E(gcon)$weight/10)
+
+# fixer le paramètre de taille
+inches <- 0.05
+
+# choisir la variable quantitative à représenter
+var <- strength(gtop)
+
+# fixer la surface du plus grand cercle
+smax <- inches * inches * pi
+
+# fixer le rayon des cercles
+# on multiplie par 200 car le package igraph divise, par défaut,
+# la taille des rayons par 200 (version 1.2.4.1)
+siz <- sqrt((var * smax/max(var))/pi)
+size <- siz*200
+
+# fixer la taille des cercles
+V(gtop)$size <- size
+
+# sélectionner les valeurs des 4 tailles de cercles qui seront représentés dans la légende
+varvect <- seq(max(var), min(var), length.out = 4)
+
+# fixer la largeur du plus gros flux
+maxsize <- 10 # epaisseur du plus gros lien
+
+# paramétrer l'épaisseur des liens
+E(gtop)$width <-((E(gtop)$weight/max(E(gtop)$weight))*maxsize)
+
+# fixer les seuils et épaisseurs de liens qui seront représentés dans la légende
+
+# 1. retenir 5 valeurs entre la val. min et max
+breaks.edge <- seq(max(E(gtop)$weight), min(E(gtop)$weight), length.out = 5)
+
+# 2. liste des épaisseurs des liens apparaissant dans la légende
+lwd.edge <- ((breaks.edge[1:4]/max(E(gtop)$weight))*maxsize)
+
+ldh <- layout_with_gem(gtop)
+
+# générer une nouvelle représentation
+plot.new()
+
+# enregistrer les paramètres graphiques d'origine
+opar <- par()
+
+# export the plot as a pdf ou svg
+# svg(file="plots/Topics_network.svg", width = 8, height= 6)
+
+# créer une nouvelle représentation
+plot.new()
+
+# normaliser l'espace dans lequel les sommets sont positionnés
+ln <- norm_coords(ldh, ymin=-1, ymax=1, xmin=-1, xmax=1)
+
+# fixer de nouveaux paramètres graphiques
+ par(mar = c(0,0,1.2,0), usr = c(-1.6,1.6,-1.6,1.6)) # -1.8,1.8,-1.8,1.8 ## xmin, xmax, ymin, et ymax
+
+# adapter le paramètre de taille des cercles de la légende
+# en tenant compte des paramètres graphiques sélectionnés
+xinch <- diff(par("usr")[1L:2])/par("pin")[1L]
+sizevect <- inches/xinch
+
+# représenter le réseau et les labels des sommets
+plot(gtop, edge.curved=.1, rescale = F, layout = ln, add = T, main = "", edge.width = E(gtop)$width,
+     vertex.frame.color = "grey",
+     vertex.color = colorlist[as.factor(V(gtop)$rtopic)],
+     vertex.label.family = "sans", # police des labels
+     vertex.label.color = "black", # police des labels
+     vertex.label.degree = -pi/2, # angle de positionnement des labels
+     vertex.label.dist = sqrt(V(gtop)$size)/pi +0.2, # distance des labels
+     vertex.label.cex = 0.7) # taille des labels
+
+# ajouter la légende indiquant la taille des cercles
+legendCirclesSymbols(pos = "topright", title.txt ="Nb of communications",
+                     title.cex = 0.6, values.cex = 0.5,
+                     var = varvect, inches = sizevect, #taille des cercles
+                     col = "white", frame = F,
+                     style = "e") # choix du style "étendu" pour plus de lisibilité
+
+# ajouter la légende indiquant l'épaisseur des liens
+legendGradLines(pos = "topleft", # position de la légende
+                title.txt = "Nb of joint communications", # titre de la légende
+                title.cex = 0.6, values.cex = 0.6, # taille des caractères
+                breaks = breaks.edge, # intervalles des valeurs représentées
+                lwd = lwd.edge, # épaisseur des liens
+                col = "gray80", # couleur des liens
+                values.rnd = 0, # nombre de chiffre après la virgule
+                frame = F) # cadre de la légende
+
+# activer la ligne suivante si vous souhaitez nettoyer la fenêtre graphique
+# dev.off()
+
+```
