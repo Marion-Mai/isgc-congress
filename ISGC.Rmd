@@ -494,94 +494,98 @@ V(gtop)$label <- as_vector(str_remove_all(str_trunc(V(gtop)$rtopic, 16, "right")
 
 # plot(gcon, layout = layout_with_gem, vertex.color = colorlist[as.factor(V(gcon)$topic)], edge.width = E(gcon)$weight/10)
 
-# fixer le paramètre de taille
+# Set the size parameter (the size of the nodes will depend on the value of this parameter)
+# Increase this value if you want bigger nodes
+
 inches <- 0.05
 
-# choisir la variable quantitative à représenter
+# Choose the variable to which the size of the circles should be proportional
 var <- strength(gtop)
 
-# fixer la surface du plus grand cercle
+# Fix the surface of the largest circle
 smax <- inches * inches * pi
 
-# fixer le rayon des cercles
-# on multiplie par 200 car le package igraph divise, par défaut,
-# la taille des rayons par 200 (version 1.2.4.1)
+# Fix the radius of the circles
+# we multiply by 200 because the igraph package divides, by default, 
+# radius value per 200 (version 1.2.4.1)
+
 siz <- sqrt((var * smax/max(var))/pi)
 size <- siz*200
 
-# fixer la taille des cercles
+# Set the size of the circles
 V(gtop)$size <- size
 
-# sélectionner les valeurs des 4 tailles de cercles qui seront représentés dans la légende
+# Select the values of the 4 sizes of circles that will be represented in the legend
 varvect <- seq(max(var), min(var), length.out = 4)
 
-# fixer la largeur du plus gros flux
-maxsize <- 10 # epaisseur du plus gros lien
+# Set the width of the largest flow
+maxsize <- 10 
 
-# paramétrer l'épaisseur des liens
+# Set the link thickness
 E(gtop)$width <-((E(gtop)$weight/max(E(gtop)$weight))*maxsize)
 
-# fixer les seuils et épaisseurs de liens qui seront représentés dans la légende
+# Set the thresholds and link thicknesses that will be represented in the legend
 
-# 1. retenir 5 valeurs entre la val. min et max
+# 1. Select 5 values between min. and max. val.
 breaks.edge <- seq(max(E(gtop)$weight), min(E(gtop)$weight), length.out = 5)
 
-# 2. liste des épaisseurs des liens apparaissant dans la légende
+# 2. list of thicknesses of the links appearing in the legend
 lwd.edge <- ((breaks.edge[1:4]/max(E(gtop)$weight))*maxsize)
 
 ldh <- layout_with_gem(gtop)
 
-# générer une nouvelle représentation
+# Generate a new plot
 plot.new()
 
-# enregistrer les paramètres graphiques d'origine
+# Save the original graphic settings
 opar <- par()
 
-# export the plot as a pdf ou svg
+# Activate the following line if you want a pdf or svg output
 # svg(file="plots/Topics_network.svg", width = 8, height= 6)
 
-# créer une nouvelle représentation
+# Generate a new plot
 plot.new()
 
-# normaliser l'espace dans lequel les sommets sont positionnés
+# Normalize the space in which the vertices are positioned 
 ln <- norm_coords(ldh, ymin=-1, ymax=1, xmin=-1, xmax=1)
 
-# fixer de nouveaux paramètres graphiques
+# Setting new graphic parameters
  par(mar = c(0,0,1.2,0), usr = c(-1.6,1.6,-1.6,1.6)) # -1.8,1.8,-1.8,1.8 ## xmin, xmax, ymin, et ymax
 
-# adapter le paramètre de taille des cercles de la légende
-# en tenant compte des paramètres graphiques sélectionnés
+# Adjust the size parameter of the legend circles ({cartography} package)
+# taking into account the selected graphic parameters
+
 xinch <- diff(par("usr")[1L:2])/par("pin")[1L]
 sizevect <- inches/xinch
 
-# représenter le réseau et les labels des sommets
+# Plot the network and labels of the nodes
 plot(gtop, edge.curved=.1, rescale = F, layout = ln, add = T, main = "", edge.width = E(gtop)$width,
      vertex.frame.color = "grey",
      vertex.color = colorlist[as.factor(V(gtop)$rtopic)],
-     vertex.label.family = "sans", # police des labels
-     vertex.label.color = "black", # police des labels
-     vertex.label.degree = -pi/2, # angle de positionnement des labels
-     vertex.label.dist = sqrt(V(gtop)$size)/pi +0.2, # distance des labels
-     vertex.label.cex = 0.7) # taille des labels
+     vertex.label.family = "sans", # labels' font
+     vertex.label.color = "black", # labels' color
+     vertex.label.degree = -pi/2, # label positioning angle
+     vertex.label.dist = sqrt(V(gtop)$size)/pi +0.2, # distance of labels
+     vertex.label.cex = 0.7) # labels' size
 
-# ajouter la légende indiquant la taille des cercles
+# Add the legend indicating the size of the circles
 legendCirclesSymbols(pos = "topright", title.txt ="Nb of communications",
                      title.cex = 0.6, values.cex = 0.5,
-                     var = varvect, inches = sizevect, #taille des cercles
+                     var = varvect, inches = sizevect, # circles' size
                      col = "white", frame = F,
-                     style = "e") # choix du style "étendu" pour plus de lisibilité
+                     style = "e") # choice of "extended" style for better readability
 
-# ajouter la légende indiquant l'épaisseur des liens
-legendGradLines(pos = "topleft", # position de la légende
-                title.txt = "Nb of joint communications", # titre de la légende
-                title.cex = 0.6, values.cex = 0.6, # taille des caractères
-                breaks = breaks.edge, # intervalles des valeurs représentées
-                lwd = lwd.edge, # épaisseur des liens
-                col = "gray80", # couleur des liens
-                values.rnd = 0, # nombre de chiffre après la virgule
-                frame = F) # cadre de la légende
+# Add the legend indicating the thickness of the links
+legendGradLines(pos = "topleft", # legend position
+                title.txt = "Nb of joint communications", # legend's title
+                title.cex = 0.6, values.cex = 0.6, # font size
+                breaks = breaks.edge, # intervals of the displayed values
+                lwd = lwd.edge, # link thickness
+                col = "gray80", # link color
+                values.rnd = 0, # number of digits after the decimal point
+                frame = F) # legend's frame
 
-# activer la ligne suivante si vous souhaitez nettoyer la fenêtre graphique
+# activate the following line if you want to clean up the graphics window
 # dev.off()
 
 ```
