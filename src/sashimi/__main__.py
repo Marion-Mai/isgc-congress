@@ -1,12 +1,46 @@
 #! /usr/bin/env python
 
+import graph_tool  # not used, but avoids an import order bug
 import abstractology
 import pandas as pd
 
-# not used, but avoids an import order bug
-import graph_tool
-
 graph_tool
+
+""" NOTES
+
+- Data columns:
+    ['abstract_text',
+     'abstract_title',
+     'bibliography',
+     'cancelled',
+     'code',
+     'figure_legend_1',
+     'figure_legend_2',
+     'figure_title_1',
+     'figure_title_2',
+     'final_status',
+     'id',
+     'index',
+     'is_complete',
+     'keyword_1',
+     'keyword_2',
+     'keyword_3',
+     'keyword_4',
+     'keywords',
+     'legend_1',
+     'legend_2',
+     'not_to_remind',
+     'program_day',
+     'program_session',
+     'publish_onsite',
+     'relance_register',
+     'topic_1',
+     'topic_2',
+     'topic_3',
+     'user_id',
+     'validate',
+     'year']
+"""
 
 
 def reload():
@@ -44,20 +78,33 @@ def bootstrap():
     a.load_domain_topic_model()
     a.set_graph(extend={"prop": "year"})
     a.load_domain_chained_model()
+    a.set_graph(extend={"prop": "topic_1"})
+    a.load_domain_chained_model()
     a.register_config()
 
     return a
 
 
 def load():
-    a = abstractology.Graphology("auto_abstractology/reports/config.json")
+    a = abstractology.Graphology(
+        config="auto_abstractology/reports/config.json",
+        load_data=False,
+    )
     _load_data(a)
 
     return a
 
 
 def plot(a):
+    a.load_domain_topic_model()
     a.plot_sashimi("ISGC 2015-2017")
+
+    a.set_graph(extend={"prop": "year"})
+    a.load_domain_chained_model()
+    a.plot_sashimi("ISGC 2015-2017", chained=True)
+
+    a.set_graph(extend={"prop": "topic_1"})
+    a.load_domain_chained_model()
     a.plot_sashimi("ISGC 2015-2017", chained=True)
 
 
