@@ -63,6 +63,7 @@ authors_abstracts <- filter(authors_abstracts, ! firstname %in% c("A. SIMPSON & 
     )
   ) # --> file with 6485 rows
 
+###### TO DO: remove duplicated participants' names per abstract
 
 # isolate authors identity information only
 authors <- authors_abstracts %>%
@@ -85,8 +86,11 @@ ncor <- n %>%
           group_by(a_firstname, a_lastname)  %>%
           summarise(a_email = first(a_email), nb_email = n()) # file with 4131 rows
 
+# TO DO: keep the longest name instead of the first
+# Dont take the organisation team's email into account
 
 ncor <- ncor %>%
+       mutate(a_email = ifelse(a_email == 1, paste0("Tag", "_", a_firstname, "_", a_lastname), a_email)) %>%
        group_by(a_lastname, a_email) %>% #
           mutate(b_firstname = first(a_firstname), b_lastname = first(a_lastname), a_email = first(a_email), nb_email = first(nb_email)) %>%
        ungroup() %>%

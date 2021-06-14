@@ -541,7 +541,7 @@ plot.new()
 opar <- par()
 
 # Activate the following line if you want a pdf or svg output
-# svg(file="plots/Topics_network.svg", width = 8, height= 6)
+svg(file="plots/Topics_network_recoded.svg", width = 8, height= 6)
 
 # Generate a new plot
 plot.new()
@@ -550,7 +550,7 @@ plot.new()
 ln <- norm_coords(ldh, ymin=-1, ymax=1, xmin=-1, xmax=1)
 
 # Setting new graphic parameters
- par(mar = c(0,0,1.2,0), usr = c(-1.6,1.6,-1.6,1.6)) # -1.8,1.8,-1.8,1.8 ## xmin, xmax, ymin, et ymax
+ par(mar = c(0,0,1.2,0), usr = c(-1.2,1.2,-1.2,1.2)) # -1.8,1.8,-1.8,1.8 ## xmin, xmax, ymin, et ymax
 
 # Adjust the size parameter of the legend circles ({cartography} package)
 # taking into account the selected graphic parameters
@@ -586,6 +586,41 @@ legendGradLines(pos = "topleft", # legend position
                 frame = F) # legend's frame
 
 # activate the following line if you want to clean up the graphics window
-# dev.off()
+ dev.off()
+
+```
+```{r ,  echo = FALSE, message = F, warning = F}
+
+
+components <-clusters(g)
+second <- sort(as.numeric(components$csize), decreasing = T)[2]
+
+# biggest_cluster_id <- which.max(components$csize)
+second_cluster_id <- which(components$csize == second)
+
+# ids
+vert_ids <- V(g)[components$membership == second_cluster_id]
+
+V(g)$membership <- components$membership
+
+## extract the component including PNA communications (draft to be edited - the issue is that PNA has two distinct indid (62 and 3620),
+# he contributed to 4th isgc talks with the following a_id: 13, 242, 610 and 693)
+
+vert_ids <- V(g)[components$membership == (V(g)$membership[V(g)$name == "13"])]
+vert_ids_2 <- V(g)[components$membership == (V(g)$membership[V(g)$name == "693"])]
+
+# subgraph
+cg <- igraph::induced_subgraph(g, vert_ids)
+cg2 <- igraph::induced_subgraph(g, vert_ids_2)
+
+cg <- cg + cg2
+cg <- add_edges(cg, c(1,4, 2,4, 3,4))
+
+V(cg)$rtopic <- c("Biomass conversion", "Biomass conversion", "New technologies", "Biomass conversion", "Biomass conversion")
+V(cg)$year <- c("2017", "2017", "2019", "2015", "2015")
+
+plot(cg, vertex.label = str_c(V(cg)$rtopic, V(cg)$year, sep = "_"))
+
+pnacom <- f %>% filter(a_id %in% c("13", "242", "610", "693"))
 
 ```

@@ -16,7 +16,7 @@ library(geonames)
 # options(geonamesUsername = "your_geonames_user")
 
 options(geonamesUsername = getOption("geonamesUsername"))
-
+options(geonamesHost="ws5.geonames.org")
 
 ############################################################################################################################
 
