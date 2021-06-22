@@ -3,8 +3,8 @@ title: "ISGC"
 author: "Marion Maisonobe"
 date: "30/04/2021"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 always_allow_html: yes
 ---
 
@@ -297,6 +297,8 @@ include_graphics("plots/congres-isgc2019-1mode.png")
 f <- left_join(d, select(abstracts, Idu, topic_1), by = "Idu" ) %>%
      group_by(Idu) %>%
      mutate(a_id = cur_group_id())  %>% ungroup()  %>% 
+     group_by(i) %>%
+     mutate(p_id = cur_group_id())  %>% ungroup()  %>%
      mutate(rtopic = recode(topic_1, "Renewable carbon" = "Biomass conversion", 
                 "Waste valorization" = "Biomass conversion",
                 "Chemical valorization of wastes" = "Biomass conversion",
@@ -309,7 +311,7 @@ f <- left_join(d, select(abstracts, Idu, topic_1), by = "Idu" ) %>%
                 "Non-thermal activation methods" = "New technologies"
                 ))
 
-net <- select(f, e = a_id, p = idind)  %>% distinct()
+net <- select(f, e = a_id, p = p_id)  %>% distinct() #correction (2021-06-22)
 
 onemode <- projecting_tm(net, method = "sum")
 
@@ -541,7 +543,7 @@ plot.new()
 opar <- par()
 
 # Activate the following line if you want a pdf or svg output
-svg(file="plots/Topics_network_recoded.svg", width = 8, height= 6)
+# svg(file="plots/Topics_network_recoded.svg", width = 8, height= 6)
 
 # Generate a new plot
 plot.new()
@@ -586,7 +588,7 @@ legendGradLines(pos = "topleft", # legend position
                 frame = F) # legend's frame
 
 # activate the following line if you want to clean up the graphics window
- dev.off()
+# dev.off()
 
 ```
 ```{r ,  echo = FALSE, message = F, warning = F}
@@ -603,21 +605,13 @@ vert_ids <- V(g)[components$membership == second_cluster_id]
 
 V(g)$membership <- components$membership
 
-## extract the component including PNA communications (draft to be edited - the issue is that PNA has two distinct indid (62 and 3620),
+## extract the component including PNA communications, the p_id of PNA is "1829"
 # he contributed to 4th isgc talks with the following a_id: 13, 242, 610 and 693)
 
 vert_ids <- V(g)[components$membership == (V(g)$membership[V(g)$name == "13"])]
-vert_ids_2 <- V(g)[components$membership == (V(g)$membership[V(g)$name == "693"])]
 
 # subgraph
 cg <- igraph::induced_subgraph(g, vert_ids)
-cg2 <- igraph::induced_subgraph(g, vert_ids_2)
-
-cg <- cg + cg2
-cg <- add_edges(cg, c(1,4, 2,4, 3,4))
-
-V(cg)$rtopic <- c("Biomass conversion", "Biomass conversion", "New technologies", "Biomass conversion", "Biomass conversion")
-V(cg)$year <- c("2017", "2017", "2019", "2015", "2015")
 
 plot(cg, vertex.label = str_c(V(cg)$rtopic, V(cg)$year, sep = "_"))
 

@@ -63,7 +63,20 @@ authors_abstracts <- filter(authors_abstracts, ! firstname %in% c("A. SIMPSON & 
     )
   ) # --> file with 6485 rows
 
-###### TO DO: remove duplicated participants' names per abstract
+###### TO DO: remove duplicated participants' names per abstract - still needs to be done 21.06.2021
+
+#> inv <- authors_abstracts %>%
+  # filter(firstname %in% lastname)
+
+# db <- authors_abstracts %>%
+  # group_by(Idu, lastname) %>%
+  # summarise(n = n(), firstname = first(firstname), lastname = first(lastname), email = first(email)) %>%
+  # filter(n >= 2)
+
+authors <- authors_abstracts %>%
+  distinct(firstname, lastname, email) %>%
+  mutate(idind = row_number())%>%
+  arrange() # 4947 rows
 
 # isolate authors identity information only
 authors <- authors_abstracts %>%
@@ -86,22 +99,25 @@ ncor <- n %>%
           group_by(a_firstname, a_lastname)  %>%
           summarise(a_email = first(a_email), nb_email = n()) # file with 4131 rows
 
-# TO DO: keep the longest name instead of the first
-# Dont take the organisation team's email into account
+# TO DO: keep the longest name instead of the first - done 21.06.2021
+# Dont take the organisation team's email into account (email 1342) - done 21.06.2021
 
 ncor <- ncor %>%
-       mutate(a_email = ifelse(a_email == 1, paste0("Tag", "_", a_firstname, "_", a_lastname), a_email)) %>%
+       mutate(a_email = ifelse(a_email %in% c(1, 1342), paste0("Tag", "_", a_firstname, "_", a_lastname), a_email)) %>%
+       filter(a_email != "Tag_NA_NA")%>%
        group_by(a_lastname, a_email) %>% #
-          mutate(b_firstname = first(a_firstname), b_lastname = first(a_lastname), a_email = first(a_email), nb_email = first(nb_email)) %>%
+          mutate(b_firstname = a_firstname[which.max(str_length(a_firstname))],
+                 b_lastname = first(a_lastname), a_email = first(a_email), nb_email = first(nb_email)) %>%
        ungroup() %>%
+       filter(a_email != "Tag_NESSE_NA")%>%
        group_by(b_firstname, a_email) %>% #
-          mutate(b_lastname = first(b_lastname)) %>% #
+          mutate(b_lastname = b_lastname[which.max(str_length(b_lastname))]) %>% #
        ungroup() %>%
           mutate(fname = word(b_firstname, 1, sep=" ")) %>% #1st firstname
           mutate(lname = word(b_lastname, 1, sep=" ")) %>% #lst lastname
           mutate(init = str_extract(b_firstname, "^.{1}")) %>% #1st character of firstnames
        group_by(fname, b_lastname) %>% #
-          mutate(b_firstname = first(b_firstname)) %>% # # #1st character of firstnames
+          mutate(b_firstname = b_firstname[which.max(str_length(b_firstname))]) %>% # # #1st character of firstnames
        filter(!is.na(init), !is.na(a_lastname)) %>% # remove na
        group_by(init, b_lastname) %>%
           mutate(
@@ -176,6 +192,8 @@ ncor <- ncor %>%
        b_lastname =  if_else(b_lastname %in% "WASSERSCHEID", "PINHO", b_lastname), ) %>%
   mutate(b_firstname = if_else(b_lastname %in% "SONIA MILENA", "SONIA MILENA", b_firstname),
        b_lastname =  if_else(b_lastname %in% "SONIA MILENA", "AGUILERA SEGURA", b_lastname), )%>%
+  mutate(b_firstname = if_else(b_lastname %in% "CONSTABLE", "DAVID J", b_firstname), # added 22.06.2021
+         b_lastname =  if_else(b_lastname %in% "CONSTABLE", "CHICHESTER CONSTABLE", b_lastname), )%>%
 
   # Remaining questions:
   # are ANA LOPEZ and ANA LOPEZ CONTRERAS the same person? does not seem so, different institution & country
@@ -196,22 +214,35 @@ ncor <- ncor %>%
 out <- ncor %>%
        distinct(b_firstname, b_lastname) # 3893 unique id # issue: previousely: 3889
 
+# reorder inversed names (from Dimensions)
+
+nameinv <- read_csv("data-net/name_isgc_inverse.csv")
+
+ncor <- ncor %>%
+  left_join(nameinv, by = c("b_lastname" = "family_name", "b_firstname" = "first_name")) %>%
+  mutate(c_firstname = ifelse(is.na(id), b_firstname, b_lastname),
+         c_lastname = ifelse(is.na(id), b_lastname, b_firstname))
+
+
 # integrate cleaned names in 'authors' and 'authors_abstracts' tables - n is an intermediary table
 
 n <- n %>%
-           left_join(select(ncor, a_firstname, a_lastname, b_firstname, b_lastname)) # 4947 rows # Joining, by = c("a_firstname", "a_lastname")
+           left_join(select(ncor, a_firstname, a_lastname, c_firstname, c_lastname)) # 4947 rows # Joining, by = c("a_firstname", "a_lastname")
 
 authors <- authors %>%
-  left_join(select(n, idind, b_firstname, b_lastname)) # Joining, by = "idind"
+  left_join(select(n, idind, c_firstname, c_lastname)) # Joining, by = "idind"
 
 authors_abstracts <- authors_abstracts %>%
   left_join(authors) %>% # 6485 rows
-  drop_na(b_lastname) %>% # remove NA (in a later stage try to find them in another table) --> 6459 rows (26 NA have been removed)
-  unite("i", b_firstname:b_lastname, sep = ", ", remove = F) %>%
+  drop_na(c_lastname) %>% # remove NA (in a later stage try to find them in another table) --> 6459 rows (26 NA have been removed)
+  unite("i", c_firstname:c_lastname, sep = ", ", remove = F) %>%
   distinct() # from 6459 rows to 6451
 
 
+length(unique(authors_abstracts$i)) #3867 unique names
+
 write_tsv(authors_abstracts, "data-net/edges-2015-2019.tsv")
+authors_abstracts <- read_tsv("data-net/edges-2015-2019.tsv")
 
 ############################## ###################################################################################################
 
