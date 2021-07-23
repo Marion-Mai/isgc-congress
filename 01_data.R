@@ -169,6 +169,7 @@ ncor <- ncor %>%
   mutate(b_lastname = if_else(b_lastname %in% "PERA TITUS EXT", "PERA TITUS", b_lastname)) %>%
   mutate(b_lastname = if_else(b_lastname %in% "GALLUCI", "GALLUCCI", b_lastname)) %>% # file with 4129 rows
   mutate(b_firstname = if_else(b_lastname %in% "CORDOVA", "ARMANDO", b_firstname)) %>% # added 23.07.2021
+  mutate(b_firstname = if_else(b_lastname %in% "BURGUETE", "MARIA ISABEL", b_firstname)) %>% # added 23.07.2021
   mutate(b_firstname = if_else(b_lastname %in% "RODE", "CHANDRASHEKHAR", b_firstname))  # added 23.07.2021
 
 ncor %>% distinct(b_firstname, b_lastname) %>%
@@ -200,6 +201,8 @@ ncor <- ncor %>%
          b_lastname =  if_else(b_lastname %in% "JEAN MICHEL", "TATIBOUET", b_lastname), )%>%
   mutate(b_firstname = if_else(b_lastname %in% "MOHD ZAINI", "NURUL AQILAH MOHD", b_firstname), # added 23.07.2021
          b_lastname =  if_else(b_lastname %in% "MOHD ZAINI", "ZAINI", b_lastname), )%>%
+  mutate(b_firstname = if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "ALEXANDRE", b_firstname), # added 23.07.2021
+         b_lastname =  if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "PINSOLLE", b_lastname), )%>%
 
   # Remaining questions:
   # are ANA LOPEZ and ANA LOPEZ CONTRERAS the same person? does not seem so, different institution & country

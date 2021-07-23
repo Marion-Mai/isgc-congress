@@ -4839,7 +4839,7 @@ Idu	year	id	title	firstname	lastname	email	j	author_type	is_corresponding	final_
 1263	2015	407	NA	MOUSTY	Christine	775	2015_21_4	other	NA	FC	Institut de Chmie de Clermont-Ferrand - UMR 6296 CNRS	24, avenue des Landais, 63177 Aubière Cedex	NA	Aubière	France	3722	CHRISTINE, MOUSTY	CHRISTINE	MOUSTY
 1263	2015	407	NA	ALI	Ghina	179	2015_21_4	other	NA	FC	Institut de Chmie de Clermont-Ferrand - UMR 6296 CNRS	24, avenue des Landais, 63177 Aubière Cedex	NA	Aubière	France	3723	GHINA, ALI	GHINA	ALI
 1263	2015	407	NA	SARRAZIN	Flavie	1270	2015_21_4	other	NA	FC	Solvay, LOF, Laboratoire du Futur	178 avenue Schweitzer	NA	Pessac	France	3724	FLAVIE, SARRAZIN	FLAVIE	SARRAZIN
-1263	2015	407	NA	PINSOLLE-EXTERIEUR	Alexandre	171	2015_21_4	other	NA	FC	Solvay, LOF, Laboratoire du Futur	178 avenue Schweitzer	NA	Pessac	France	3725	PINSOLLE EXTERIEUR, ALEXANDRE	PINSOLLE EXTERIEUR	ALEXANDRE
+1263	2015	407	NA	PINSOLLE-EXTERIEUR	Alexandre	171	2015_21_4	other	NA	FC	Solvay, LOF, Laboratoire du Futur	178 avenue Schweitzer	NA	Pessac	France	3725	ALEXANDRE, ALEXANDRE	ALEXANDRE	ALEXANDRE
 1264	2015	406	NA	Jennifer	Dodson	1848	2015_67_1	presenting	NA	PC	University of York	Green Chemistry Centre of Excellence, Department of Chemistry, University of York	NA	York	United Kingdom	3726	JENNIFER, DODSON	JENNIFER	DODSON
 1264	2015	406	NA	James	Clark	1760	2015_67_1	other	NA	PC	Green Chemistry Centre of Excellence	Department of Chemistry, University of York	NA	York	United Kingdom	3727	JAMES, CLARK	JAMES	CLARK
 1264	2015	406	NA	Thomas	Farmer	3784	2015_67_1	other	NA	PC	Green Chemistry Centre of Excellence	Department of Chemistry, University of York	NA	York	United Kingdom	3728	THOMAS, FARMER	THOMAS	FARMER
@@ -6002,7 +6002,7 @@ Idu	year	id	title	firstname	lastname	email	j	author_type	is_corresponding	final_
 1538	2015	870	NA	Jean-Stéphane	Condoret	1843	2015_4_1	other	NA	FC	Laboratoire de Génie Chimique	4 Allee Emile Monso	NA	Toulouse	France	4621	JEAN STEPHANE, CONDORET	JEAN STEPHANE	CONDORET
 1539	2015	871	NA	S. V.	LUIS	2386	2015_51_4	presenting	NA	OC	University Jaume I	NA	NA	Castellón	Spain	4523	SANTIAGO V, LUIS	SANTIAGO V	LUIS
 1539	2015	871	NA	S. V.	Luis	2386	2015_51_4	other	NA	OC	University Jaume I	Av Sos Baynat s/n	NA	Castellon	Spain	4622	SANTIAGO V, LUIS	SANTIAGO V	LUIS
-1539	2015	871	NA	M.I.	Burguete	602	2015_51_4	other	NA	OC	University Jaume I	Av Sos Baynat s/n	NA	Castellon	Spain	4623	MI, BURGUETE	MI	BURGUETE
+1539	2015	871	NA	M.I.	Burguete	602	2015_51_4	other	NA	OC	University Jaume I	Av Sos Baynat s/n	NA	Castellon	Spain	4623	MARIA ISABEL, BURGUETE	MARIA ISABEL	BURGUETE
 1539	2015	871	NA	Pedro	Lozano	3187	2015_51_4	other	NA	OC	Universidad de Murcia	Campus de Espinardo E-30.100.	NA	Murcia	Spain	4624	PEDRO, LOZANO	PEDRO	LOZANO
 1539	2015	871	NA	Belen	Altava	206	2015_51_4	other	NA	OC	University Jaume I	Av Sos Baynat s/n	NA	Castellon	Spain	4625	BELEN, ALTAVA	BELEN	ALTAVA
 1540	2015	872	NA	Jorge F. B.	Pereira	1876	2015_68_4	presenting	NA	PC	Department of Bioprocess and Biotechnology, School of Pharmacy, São Paulo State University - UNESP	CEP 14801-902 SP	NA	Araraquara	Brazil	4626	JORGE FERNANDO BRANDAO, PEREIRA	JORGE FERNANDO BRANDAO	PEREIRA
