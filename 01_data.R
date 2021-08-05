@@ -1,5 +1,5 @@
 ## ISGC NETCONF SCRIPT 1 - SUNBELT 2020 - 01_data.R
-## 2020-07-14 Bastille Day
+## first draft: 2020-07-14 Bastille Day; last edit: 2021-08-05
 ## M. Maisonobe & F. Briatte
 
 # load libraries
@@ -42,7 +42,7 @@ authors_abstracts <- read_tsv("data/authors-abstracts-2015-2019.tsv")
 # solve a few problematic case (including 'two lines on one' issue)
 authors_abstracts <- filter(authors_abstracts, ! firstname %in% c("A. SIMPSON &  P. JESSOP",
                                           "Patrick MAESTRO, SOLVAY, Scientific director / Jean-Luc Moullet CNRS, General Director in charge of valorization / Serge HUBERSON, University of Poitiers, Vice-President in charge of research",
-                                          "StÃ©phane STREIFF, SOLVAY, Directeur E2P2L, ShanghaÃ¯, CHINA  / Yannick POUILLOUX, University of Poitiers, Directeur IC2MP, POITIERS, FRANCE",
+                                          "Stéphane STREIFF, SOLVAY, Directeur E2P2L, Shanghaï, CHINA  / Yannick POUILLOUX, University of Poitiers, Directeur IC2MP, POITIERS, FRANCE",
                                           "A. KOVACS", "F. TOUCHARD"
                             )) %>%
   bind_rows(
@@ -51,7 +51,7 @@ authors_abstracts <- filter(authors_abstracts, ! firstname %in% c("A. SIMPSON & 
       ~ firstname, ~ lastname, ~ year, ~ id, ~ Idu, ~ j,  ~ email, ~ institution, ~ city, ~ country,
       "A.", "SIMPSON", 2019, 1138, 1055, "2019_1705_1643", 1, "Royal Society of Chemistry", "CAMBRIDGE", "UNITED-KINGDOM",
       "P.", "JESSOP", 2019, 1138, 1055, "2019_1705_1643", 1, "Queen's University", "KINGSTON", "CANADA",
-      "StÃ©phane", "STREIFF", 2019, 1146, 1063, "2019_1715_1452", 1, "SOLVAY", "SHANGHAI", "CHINA",
+      "Stéphane", "STREIFF", 2019, 1146, 1063, "2019_1715_1452", 1, "SOLVAY", "SHANGHAI", "CHINA",
       "Yannick", "POUILLOUX", 2019, 1146, 1063, "2019_1715_1452", 1, "University of Poitiers", "POITIERS", "FRANCE",
       "Patrick", "MAESTRO", 2019, 1147, 1064, "2019_1715_1452", 1, "SOLVAY", "PARIS", "FRANCE",
       "Jean-Luc", "Moullet", 2019, 1147, 1064, "2019_1715_1452", 1, "CNRS", "PARIS", "FRANCE",
@@ -159,7 +159,7 @@ ncor <- ncor %>%
   mutate(b_lastname = if_else(b_lastname %in% "VANBOREKHOVEN", "VANBROEKHOVEN", b_lastname)) %>%
   mutate(b_lastname = if_else(b_lastname %in% "RODENAS OLALLA", "RODENAS OLAYA", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "WAN MOHD ASHRI", "WAN MOHD ASHRI WAN", b_firstname),
-         b_lastname =  if_else(b_lastname %in% "WAN MOHD ASHRI", "DAUD", b_lastname), ) %>%
+         b_lastname =  if_else(b_lastname %in% "WAN MOHD ASHRI", "DAUD", b_lastname)) %>%
   mutate(b_lastname = if_else(b_lastname %in% "BJARACHARYA", "BAJRACHARYA", b_lastname)) %>%
   mutate(b_lastname = if_else(b_lastname %in% "HESEMAN", "HESEMANN", b_lastname)) %>%
   mutate(b_lastname = if_else(b_firstname %in% "AIGARS", "PAZHE", b_lastname)) %>%
@@ -170,8 +170,33 @@ ncor <- ncor %>%
   mutate(b_lastname = if_else(b_lastname %in% "GALLUCI", "GALLUCCI", b_lastname)) %>% # file with 4129 rows
   mutate(b_firstname = if_else(b_lastname %in% "CORDOVA", "ARMANDO", b_firstname)) %>% # added 23.07.2021
   mutate(b_firstname = if_else(b_lastname %in% "BURGUETE", "MARIA ISABEL", b_firstname)) %>% # added 23.07.2021
-  mutate(b_firstname = if_else(b_lastname %in% "RODE", "CHANDRASHEKHAR", b_firstname))  # added 23.07.2021
-
+  mutate(b_firstname = if_else(b_lastname %in% "RODE", "CHANDRASHEKHAR", b_firstname)) %>% # added 23.07.2021
+  mutate(b_firstname = if_else(b_lastname %in% "KRUGER", "ANDREAS JD", b_firstname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "SARI SCHMAYSSEM", "SARI CHMAYSSEM", b_lastname)) %>% # added 05.08.2021 # the two forms can be used
+  mutate(b_lastname = if_else(b_lastname %in% "WALMSLAY", "WALMSLEY", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "BUTT", "BUT", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "LE BRECHT", "LE BRECH", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "BAUEMEL", "BAUMEL", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "DESHAYESD", "DESHAYES", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "REBUTEAU", "RABUTEAU", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "AL NAJAR", "AL NAJJAR", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "HEVERKERL", "HEVEKERL", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "GUGLIARELLI", "GUIGLIARELLI", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "DEBORA BIZZO BRUM PEREIRA", "BIZZO BRUM PEREIRA", b_lastname)) %>% # added 05.08.2021
+  mutate(b_lastname = if_else(b_lastname %in% "GALVEZ", "GALVEZ PARRUCA", b_lastname)) %>% # added 05.08.2021 # sometimes Maria Elena Galvez only
+  mutate(b_firstname = if_else(b_lastname %in% "WIKEE", "SAOWANEE", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "BELAABED", "RAJA", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "CAILLOL", "SYLVAIN", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "MARTIN LARA", "MARIA ANGELES", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "GALVEZ PARRUCA", "MARIA ELENA", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "MOUSELMANI", "RIM", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "FICHET", "DENIS", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "BERNAS", "HEIDI", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "HERRERA CANO", "NATIVIDAD", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "KOUMBA YOYA", "GEORGES THIBAUT", b_firstname)) %>% # added 05.08.2021
+  mutate(b_firstname = if_else(b_lastname %in% "MADJINZA", "DESIX DIANE", b_firstname)) %>% # added 05.08.2021 also known as Desix Madjinza only
+  mutate(b_firstname = if_else(b_firstname %in% "DIVYANAG M", "DIVYANG M", b_firstname))  # added 05.08.2021
+    
 ncor %>% distinct(b_firstname, b_lastname) %>%
 filter(str_detect(b_lastname, "^(\\w\\s)+"))  # manual action required for A RITA C DUARTE, ANA M MATIAS, L REIS etc.
 
@@ -183,26 +208,49 @@ for (i in unique(ncor$name)){
 
 ncor <- ncor %>%
   mutate(b_firstname = if_else(b_lastname %in% "C DUARTE", "ANA", b_firstname),
-         b_lastname =  if_else(b_lastname %in% "C DUARTE", "DUARTE", b_lastname), ) %>%
+         b_lastname =  if_else(b_lastname %in% "C DUARTE", "DUARTE", b_lastname)) %>%
   mutate(b_lastname = if_else(b_lastname %in% "M MATIAS", "MATIAS", b_lastname))  %>%
   mutate(b_firstname = if_else(b_lastname %in% "L REIS", "RL", b_firstname),
-         b_lastname =  if_else(b_lastname %in% "L REIS", "REIS", b_lastname), ) %>%
+         b_lastname =  if_else(b_lastname %in% "L REIS", "REIS", b_lastname)) %>%
   mutate(b_firstname = if_else(name %in% "JOSE, I GARCIA", "JOSE I", b_firstname),
-         b_lastname =  if_else(name %in% "JOSE, I GARCIA", "GARCIA", b_lastname), ) %>%
+         b_lastname =  if_else(name %in% "JOSE, I GARCIA", "GARCIA", b_lastname)) %>%
   mutate(b_firstname = if_else(name %in% "SIMAO, P PINHO", "SIMAO P", b_firstname),
-       b_lastname =  if_else(name %in% "SIMAO, P PINHO", "PINHO", b_lastname), ) %>%
+       b_lastname =  if_else(name %in% "SIMAO, P PINHO", "PINHO", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "WASSERCHEID", "PETER", b_firstname),
-       b_lastname =  if_else(b_lastname %in% "WASSERSCHEID", "PINHO", b_lastname), ) %>%
+       b_lastname =  if_else(b_lastname %in% "WASSERCHEID", "WASSERSCHEID", b_lastname)) %>% # corrected 05.08.2021
   mutate(b_firstname = if_else(b_lastname %in% "SONIA MILENA", "SONIA MILENA", b_firstname),
-       b_lastname =  if_else(b_lastname %in% "SONIA MILENA", "AGUILERA SEGURA", b_lastname), )%>%
+       b_lastname =  if_else(b_lastname %in% "SONIA MILENA", "AGUILERA SEGURA", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "CONSTABLE", "DAVID J", b_firstname), # added 22.06.2021
-         b_lastname =  if_else(b_lastname %in% "CONSTABLE", "CHICHESTER CONSTABLE", b_lastname), )%>%
+         b_lastname =  if_else(b_lastname %in% "CONSTABLE", "CHICHESTER CONSTABLE", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "JEAN MICHEL", "JEAN MICHEL", b_firstname), # added 23.07.2021
-         b_lastname =  if_else(b_lastname %in% "JEAN MICHEL", "TATIBOUET", b_lastname), )%>%
+         b_lastname =  if_else(b_lastname %in% "JEAN MICHEL", "TATIBOUET", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "MOHD ZAINI", "NURUL AQILAH MOHD", b_firstname), # added 23.07.2021
-         b_lastname =  if_else(b_lastname %in% "MOHD ZAINI", "ZAINI", b_lastname), )%>%
+         b_lastname =  if_else(b_lastname %in% "MOHD ZAINI", "ZAINI", b_lastname)) %>%
   mutate(b_firstname = if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "ALEXANDRE", b_firstname), # added 23.07.2021
-         b_lastname =  if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "PINSOLLE", b_lastname), )%>%
+         b_lastname =  if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "PINSOLLE", b_lastname))%>%
+  mutate(b_firstname = if_else(b_firstname %in% "SAADIA", "SAIDIA", b_firstname), # added 05.08.2021
+         b_lastname =  if_else(b_firstname %in% "SAADIA", "CHERIEF", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "THIMOTEO AZEVEDO JORGE", "FERNANDA THIMOTEO AZEVEDO", b_firstname), # added 05.08.2021
+         b_lastname =  if_else(b_lastname %in% "THIMOTEO AZEVEDO JORGE", "JORGE", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "OULD DRISS", "AISSA", b_firstname), # added 05.08.2021
+         b_lastname =  if_else(b_lastname %in% "OULD DRISS", "OULD DRIS", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "J LEACHY", "JAMES J", b_firstname), # added 05.08.2021
+         b_lastname =  if_else(b_lastname %in% "J LEACHY", "LEAHY", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "REMY", "REMY", b_firstname), # added 05.08.2021
+         b_lastname =  if_else(b_lastname %in% "REMY", "LAUNEZ", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "ZEINEDINE", "ZEINEDDINE", b_firstname), # added 05.08.2021
+         b_lastname =  if_else(b_lastname %in% "ZEINEDINE", "DJEGHABA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "ANDRIANARIVO IRENE", "ANDRIANARIVO IRENE", b_firstname), # added 05.08.2021 - name inversion
+         b_lastname =  if_else(b_lastname %in% "ANDRIANARIVO IRENE", "RAHOBINIRINA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "GELVES", "JOHN FREDDY", b_firstname), # added 05.08.2021 - also known as JF GELVES; https://orcid.org/0000-0002-1238-6911
+         b_lastname =  if_else(b_lastname %in% "GELVES", "GELVES DIAZ", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "MICHAELE", "MIARINTSOA MICHAELE", b_firstname), # added 05.08.2021 - registered as Michaele RANARIJAONA only
+         b_lastname =  if_else(b_lastname %in% "MICHAELE", "RANARIJAONA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "JE PEREANEZ", "JUAN ENRIQUE", b_firstname), # added 05.08.2021 - registered as Sacarias, JE PEREANEZ; https://orcid.org/0000-0002-7147-9210
+         b_lastname =  if_else(b_lastname %in% "JE PEREANEZ", "PEREANEZ SACARIAS", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "RECHULSKI", "MARCELO DAVID", b_firstname), # added 05.08.2021 - registered as Sacarias, JE PEREANEZ; https://orcid.org/0000-0002-7147-9210
+         b_lastname =  if_else(b_lastname %in% "RECHULSKI", "KAUFMAN RECHULSKI", b_lastname)) %>%
+  # is Kaufman Rechulski, Marcelo Daniel the same person as Kaufman Rechulski, Marcelo David? and therefore Kaufman Rechulski, Marcelo D.
 
   # Remaining questions:
   # are ANA LOPEZ and ANA LOPEZ CONTRERAS the same person? does not seem so, different institution & country
@@ -221,9 +269,9 @@ ncor <- ncor %>%
 # remaining question: how does LILIANA A, RODRIGUEZ became	LILIANA, RODRIGUEZ and are we sure it is the same person? different city, same country, different year, different email address...
 
 out <- ncor %>%
-       distinct(b_firstname, b_lastname) # 3893 unique id # issue: previousely: 3889
+       distinct(b_firstname, b_lastname) # 3900 unique id # june 2021: 3893 unique id # issue: previousely: 3889
 
-# reorder inversed names (from Dimensions) using AÃ¯ssa's file "name_isgc_inverse"
+# reorder inversed names (from Dimensions) using Aissa's file "name_isgc_inverse"
 
 nameinv <- read_csv("data-net/name_isgc_inverse.csv")
 
@@ -248,7 +296,7 @@ authors_abstracts <- authors_abstracts %>%
   distinct() # from 6459 rows to 6451
 
 
-length(unique(authors_abstracts$i)) #3867 unique names
+length(unique(authors_abstracts$i)) #3861 unique names
 
 write_tsv(authors_abstracts, "data-net/edges-2015-2019.tsv")
 authors_abstracts <- read_tsv("data-net/edges-2015-2019.tsv")
@@ -271,8 +319,8 @@ t <- group_by(d, i) %>%
   summarise(t_c = n_distinct(year)) %>%
   arrange(-t_c)
 
-table(t$t_c) # 150 participants went to all conferences, ~ 3284 went to only 1, 459 went to 2
-table(t$t_c > 1) / nrow(t) # ~ 85% were involved only 1 of 3 conferences in 5 years # FALSE: 0.8435654 TRUE: 0.1564346
+table(t$t_c) # 151 participants went to all conferences, ~ 3253 went to only 1, 462 went to 2
+table(t$t_c > 1) / nrow(t) # ~ 84% were involved only 1 of 3 conferences in 5 years # FALSE: 0.8414382 TRUE: 0.1585618 
 
 # limiting ourselves to oral communications and flash communications panels
 d <- d %>%
@@ -283,8 +331,8 @@ t <- group_by(d, i) %>%
   summarise(t_c = n_distinct(year)) %>%
   arrange(-t_c)
 
-table(t$t_c) # 94 participants communicated to each conference, ~ 2034 communicated only once, 283 communicated twice
-table(t$t_c > 1) / nrow(t) # ~ 85% communicated only 1 of 3 conferences in 5 years # FALSE: 0.8436333 TRUE: 0.1563667
+table(t$t_c) # 97 participants communicated to each conference, ~ 2014 communicated only once, 283 communicated twice
+table(t$t_c > 1) / nrow(t) # ~ 84% communicated only 1 of 3 conferences in 5 years # FALSE: 0.8412698 TRUE: 0.1587302
 
 # number of OC and FC panels overall
 n_distinct(d$j) # 219
