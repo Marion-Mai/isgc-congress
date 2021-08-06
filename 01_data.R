@@ -38,6 +38,14 @@ write_tsv(table, "data/topic_distribution.tsv")
 # load the 2015-2019 authors-abstract dataset
 authors_abstracts <- read_tsv("data/authors-abstracts-2015-2019.tsv")
 
+#remove line breaks, tabs etc., and then 
+authors_abstracts$institution <- str_replace_all(authors_abstracts$institution, "[\\r\\n\\t]+", " ")
+
+authors_abstracts$institution[authors_abstracts$lastname %in% "ROBCIUC"]
+
+##remove excessive white space
+# authors_abstracts$institution <-  str_trim(str_replace_all(authors_abstracts$institution, "\\s+", " "))
+
 
 # solve a few problematic case (including 'two lines on one' issue)
 authors_abstracts <- filter(authors_abstracts, ! firstname %in% c("A. SIMPSON &  P. JESSOP",
@@ -73,16 +81,11 @@ authors_abstracts <- filter(authors_abstracts, ! firstname %in% c("A. SIMPSON & 
   # summarise(n = n(), firstname = first(firstname), lastname = first(lastname), email = first(email)) %>%
   # filter(n >= 2)
 
+# isolate authors identity information only
 authors <- authors_abstracts %>%
   distinct(firstname, lastname, email) %>%
   mutate(idind = row_number())%>%
   arrange() # 4947 rows
-
-# isolate authors identity information only
-authors <- authors_abstracts %>%
-           distinct(firstname, lastname, email) %>%
-           mutate(idind = row_number())%>%
-           arrange() # 4947 rows
 
 # finalize participant names
 n <- authors %>%
@@ -153,6 +156,7 @@ ncor <- ncor %>%
                   #  }
 
   mutate(b_firstname = if_else(b_lastname %in% "NARDELLO RATAJ", "VERONIQUE", b_firstname)) %>%
+  mutate(b_lastname = if_else(b_firstname %in% "ZHIHONG", "WEI", b_lastname)) %>% # added 05.08.2021 - 18:00 - modif edge.tsv # https://orcid.org/0000-0002-9460-7908
   mutate(b_firstname = if_else(b_lastname %in% "DA SILVA PEREZ", "DENILSON", b_firstname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "KOELEWIJN", "STEVEN FRISO", b_firstname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "CARMICHAEL", "EUGENE", b_firstname)) %>%
@@ -160,6 +164,8 @@ ncor <- ncor %>%
   mutate(b_lastname = if_else(b_lastname %in% "RODENAS OLALLA", "RODENAS OLAYA", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "WAN MOHD ASHRI", "WAN MOHD ASHRI WAN", b_firstname),
          b_lastname =  if_else(b_lastname %in% "WAN MOHD ASHRI", "DAUD", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "WAN DAUD", "WAN MOHD ASHRI WAN", b_firstname),  # added 05.08.2021 - 18:00
+         b_lastname =  if_else(b_lastname %in% "WAN DAUD", "DAUD", b_lastname)) %>% 
   mutate(b_lastname = if_else(b_lastname %in% "BJARACHARYA", "BAJRACHARYA", b_lastname)) %>%
   mutate(b_lastname = if_else(b_lastname %in% "HESEMAN", "HESEMANN", b_lastname)) %>%
   mutate(b_lastname = if_else(b_firstname %in% "AIGARS", "PAZHE", b_lastname)) %>%
@@ -195,9 +201,17 @@ ncor <- ncor %>%
   mutate(b_firstname = if_else(b_lastname %in% "HERRERA CANO", "NATIVIDAD", b_firstname)) %>% # added 05.08.2021
   mutate(b_firstname = if_else(b_lastname %in% "KOUMBA YOYA", "GEORGES THIBAUT", b_firstname)) %>% # added 05.08.2021
   mutate(b_firstname = if_else(b_lastname %in% "MADJINZA", "DESIX DIANE", b_firstname)) %>% # added 05.08.2021 also known as Desix Madjinza only
-  mutate(b_firstname = if_else(b_firstname %in% "DIVYANAG M", "DIVYANG M", b_firstname))  # added 05.08.2021
-    
-ncor %>% distinct(b_firstname, b_lastname) %>%
+  mutate(b_firstname = if_else(b_firstname %in% "DIVYANAG M", "DIVYANG M", b_firstname)) %>%  # added 05.08.2021
+  mutate(b_lastname = if_else(b_firstname %in% "DUMEIGNIL", "DUMEIGNIL", b_lastname), # added 06.08.2021 - name inversion
+         b_firstname =  if_else(b_firstname %in% "DUMEIGNIL", "FRANCK", b_firstname)) %>%
+  mutate(b_lastname = if_else(b_lastname %in% "NEGHADAR", "NEGAHDAR", b_lastname)) %>%
+  mutate(b_lastname = if_else(b_firstname %in% "DENILSON DA", "DA SILVA PEREZ", b_lastname),
+         b_firstname = if_else(b_firstname %in% "DENILSON DA", "DENILSON", b_firstname)) %>%
+mutate(b_lastname = if_else(b_lastname %in% "SILVA PEREZ", "DA SILVA PEREZ", b_lastname)) # modif edge.tsv # added 06.08.2021 - 10:00
+  # mutate(b_lastname = if_else(b_firstname %in% "DENILSON", "DA SILVA PEREZ", b_lastname)) # added 05.08.2021 - 18:00
+# 4129 rows
+
+list <- ncor %>% distinct(b_firstname, b_lastname) %>%
 filter(str_detect(b_lastname, "^(\\w\\s)+"))  # manual action required for A RITA C DUARTE, ANA M MATIAS, L REIS etc.
 
 # (3) check for names included in others names
@@ -207,29 +221,78 @@ for (i in unique(ncor$name)){
 }
 
 ncor <- ncor %>%
-  mutate(b_firstname = if_else(b_lastname %in% "C DUARTE", "ANA", b_firstname),
+  mutate(b_firstname = if_else(b_lastname %in% "C COSTA", "PAULO C", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "C COSTA", "COSTA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "M CASTRO", "ALINE M", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "M CASTRO", "CASTRO", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "S CASTRO", "CINTHIA S", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "S CASTRO", "CASTRO", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "S DAMASCENO", "AMANDA S", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "S DAMASCENO", "DAMASCENO", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "M MATIAS", "ANA M", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "M MATIAS", "MATIAS", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "S MORAIS", "EDUARDA S", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "S MORAIS", "MORAIS", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "A MANOEL", "EVELIN A", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "A MANOEL", "MANOEL", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "M ROBERT", "JULIA M", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "M ROBERT", "ROBERT", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "A PRIETO", "MIGUEL A", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "A PRIETO", "PRIETO", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "O SOARES", "PEDRO", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "O SOARES", "SOARES", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "A O SANTOS", "SONIA A O", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "A O SANTOS", "SANTOS", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "E SINTRA", "TANIA E", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "E SINTRA", "SINTRA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "P M VENTURA", "SONIA P M", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "P M VENTURA", "VENTURA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "N H SILVA", "NUNO N H", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "N H SILVA", "SILVA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "M DE SOUZA", "PRISCILLA M", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "M DE SOUZA", "DE SOUZA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "C RODRIGUES", "RAFAEL C", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "C RODRIGUES", "RODRIGUES", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "C CALHELHA", "RICARDO C", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "C CALHELHA", "CALHELHA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "C GUEDES DA SILVA", "MARIA FATIMA C", b_firstname), # https://app.dimensions.ai/details/entities/publication/author/ur.010030064533.77
+         b_lastname =  if_else(b_lastname %in% "C GUEDES DA SILVA", "GUEDES DA SILVA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "C F R FERREIRA", "ISABEL C F R", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "C F R FERREIRA", "FERREIRA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "F ALMEIDA", "ISABEL F", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "F ALMEIDA", "ALMEIDA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "V M NUNES", "ANA V M", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "V M NUNES", "NUNES", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "V DE ROSSO", "VERIDIANA V", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "V DE ROSSO", "DE ROSSO", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "T DA SILVA", "VICTOR T", b_firstname),
+         b_lastname =  if_else(b_lastname %in% "T DA SILVA", "DA SILVA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "C DUARTE", "ANA RITA C", b_firstname),
          b_lastname =  if_else(b_lastname %in% "C DUARTE", "DUARTE", b_lastname)) %>%
-  mutate(b_lastname = if_else(b_lastname %in% "M MATIAS", "MATIAS", b_lastname))  %>%
-  mutate(b_firstname = if_else(b_lastname %in% "L REIS", "RL", b_firstname),
+  mutate(b_firstname = if_else(b_lastname %in% "L REIS", "RUI L", b_firstname),
          b_lastname =  if_else(b_lastname %in% "L REIS", "REIS", b_lastname)) %>%
   mutate(b_firstname = if_else(name %in% "JOSE, I GARCIA", "JOSE I", b_firstname),
          b_lastname =  if_else(name %in% "JOSE, I GARCIA", "GARCIA", b_lastname)) %>%
+  mutate(b_firstname = if_else(name %in% "JOSE, M ASSAF", "JOSE M", b_firstname),
+         b_lastname =  if_else(name %in% "JOSE, M ASSAF", "ASSAF", b_lastname)) %>%
   mutate(b_firstname = if_else(name %in% "SIMAO, P PINHO", "SIMAO P", b_firstname),
-       b_lastname =  if_else(name %in% "SIMAO, P PINHO", "PINHO", b_lastname)) %>%
+         b_lastname =  if_else(name %in% "SIMAO, P PINHO", "PINHO", b_lastname)) %>%
+  mutate(b_firstname = if_else(name %in% "JOSE CLEITON, S DOS SANTOS", "JOSE CLEITON S", b_firstname), #José Cleiton Sousa dos Santos : https://orcid.org/0000-0002-1511-5180
+       b_lastname =  if_else(name %in% "JOSE CLEITON, S DOS SANTOS", "DOS SANTOS", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "WASSERCHEID", "PETER", b_firstname),
        b_lastname =  if_else(b_lastname %in% "WASSERCHEID", "WASSERSCHEID", b_lastname)) %>% # corrected 05.08.2021
   mutate(b_firstname = if_else(b_lastname %in% "SONIA MILENA", "SONIA MILENA", b_firstname),
        b_lastname =  if_else(b_lastname %in% "SONIA MILENA", "AGUILERA SEGURA", b_lastname)) %>%
-  mutate(b_firstname = if_else(b_lastname %in% "CONSTABLE", "DAVID J", b_firstname), # added 22.06.2021
-         b_lastname =  if_else(b_lastname %in% "CONSTABLE", "CHICHESTER CONSTABLE", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "CONSTABLE", "DAVID J", b_firstname)) %>% # added 22.06.2021 # check if it work! (05.08.2021)
+  mutate(b_lastname =  if_else(b_lastname %in% "CONSTABLE", "CHICHESTER CONSTABLE", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "JEAN MICHEL", "JEAN MICHEL", b_firstname), # added 23.07.2021
          b_lastname =  if_else(b_lastname %in% "JEAN MICHEL", "TATIBOUET", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "MOHD ZAINI", "NURUL AQILAH MOHD", b_firstname), # added 23.07.2021
          b_lastname =  if_else(b_lastname %in% "MOHD ZAINI", "ZAINI", b_lastname)) %>%
-  mutate(b_firstname = if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "ALEXANDRE", b_firstname), # added 23.07.2021
-         b_lastname =  if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "PINSOLLE", b_lastname))%>%
-  mutate(b_firstname = if_else(b_firstname %in% "SAADIA", "SAIDIA", b_firstname), # added 05.08.2021
-         b_lastname =  if_else(b_firstname %in% "SAADIA", "CHERIEF", b_lastname)) %>%
+  mutate(b_lastname =  if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "PINSOLLE", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_firstname %in% "PINSOLLE EXTERIEUR", "ALEXANDRE", b_firstname)) %>%  # added 23.07.2021
+  mutate(b_firstname = if_else(b_firstname %in% "SAADIA", "SAIDIA", b_firstname)) %>% # added 05.08.2021
+  mutate(b_lastname =  if_else(b_lastname %in% "CHERIAF", "CHERIEF", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "THIMOTEO AZEVEDO JORGE", "FERNANDA THIMOTEO AZEVEDO", b_firstname), # added 05.08.2021
          b_lastname =  if_else(b_lastname %in% "THIMOTEO AZEVEDO JORGE", "JORGE", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "OULD DRISS", "AISSA", b_firstname), # added 05.08.2021
@@ -240,6 +303,8 @@ ncor <- ncor %>%
          b_lastname =  if_else(b_lastname %in% "REMY", "LAUNEZ", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "ZEINEDINE", "ZEINEDDINE", b_firstname), # added 05.08.2021
          b_lastname =  if_else(b_lastname %in% "ZEINEDINE", "DJEGHABA", b_lastname)) %>%
+  mutate(b_lastname = if_else(b_firstname %in% "CONSTABLE", "CHICHESTER CONSTABLE", b_lastname), # added 06.08.2021 - name inversion
+         b_firstname =  if_else(b_firstname %in% "CONSTABLE", "DAVID J", b_firstname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "ANDRIANARIVO IRENE", "ANDRIANARIVO IRENE", b_firstname), # added 05.08.2021 - name inversion
          b_lastname =  if_else(b_lastname %in% "ANDRIANARIVO IRENE", "RAHOBINIRINA", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "GELVES", "JOHN FREDDY", b_firstname), # added 05.08.2021 - also known as JF GELVES; https://orcid.org/0000-0002-1238-6911
@@ -250,6 +315,24 @@ ncor <- ncor %>%
          b_lastname =  if_else(b_lastname %in% "JE PEREANEZ", "PEREANEZ SACARIAS", b_lastname)) %>%
   mutate(b_firstname = if_else(b_lastname %in% "RECHULSKI", "MARCELO DAVID", b_firstname), # added 05.08.2021 - registered as Sacarias, JE PEREANEZ; https://orcid.org/0000-0002-7147-9210
          b_lastname =  if_else(b_lastname %in% "RECHULSKI", "KAUFMAN RECHULSKI", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "A P COUTINHO", "JOAO A P", b_firstname), # modif edge.tsv - added 05.08.2021 18:00
+         b_lastname =  if_else(b_lastname %in% "A P COUTINHO", "COUTINHO", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "J D SILVESTRE", "ARMANDO J D", b_firstname), # modif edge.tsv - added 05.08.2021 18:00
+         b_lastname =  if_else(b_lastname %in% "J D SILVESTRE", "SILVESTRE", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "CBA ALEGRIA", "ELISABETE CBA", b_firstname), # modif edge.tsv - added 05.08.2021 18:00
+         b_lastname =  if_else(b_lastname %in% "CBA ALEGRIA", "ALEGRIA", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "M G FREIRE", "DENISE M G", b_firstname), # modif edge.tsv - added 05.08.2021 18:00
+         b_lastname =  if_else(b_lastname %in% "M G FREIRE", "FREIRE", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "S R FREIRE", "CARMEN S R", b_firstname), # modif edge.tsv - added 05.08.2021 18:00
+         b_lastname =  if_else(b_lastname %in% "S R FREIRE", "FREIRE", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_lastname %in% "G FREIRE", "MARA G", b_firstname), # modif edge.tsv - added 05.08.2021 18:00
+         b_lastname =  if_else(b_lastname %in% "G FREIRE", "FREIRE", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_firstname %in% "MARA G FREIRE", "MARA G", b_firstname)) %>% # modif edge.tsv - added 05.08.2021 18:00
+  mutate(b_firstname = if_else(b_lastname %in% "BC SIMAS", "ALESSANDRO BC", b_firstname), # modif edge.tsv - added 05.08.2021 18:00
+         b_lastname =  if_else(b_lastname %in% "BC SIMAS", "SIMAS", b_lastname)) %>%
+  mutate(b_lastname = if_else(b_firstname %in% "EDUARDO FERREIRA DA", "FERREIRA DA SILVA", b_lastname), # modif edge.tsv - added 05.08.2021 18:00
+         b_firstname =  if_else(b_firstname %in% "EDUARDO FERREIRA DA", "EDUARDO", b_firstname)) %>%
+
   # is Kaufman Rechulski, Marcelo Daniel the same person as Kaufman Rechulski, Marcelo David? and therefore Kaufman Rechulski, Marcelo D.
 
   # Remaining questions:
@@ -264,12 +347,18 @@ ncor <- ncor %>%
   mutate(b_firstname = if_else(name %in% "MARIA FRANCISCA, MANO", "FRANCISCA", b_firstname)) %>%
   mutate(b_firstname = if_else(name %in% "T, CANTAT", "THIBAULT", b_firstname)) %>%
   mutate(b_lastname = if_else(name %in% "MARIA, FUENTES", "FUENTES CAMPOS", b_lastname)) %>%
-  mutate(b_lastname = if_else(name %in% "JON, SOLAR", "SOLAR IRAZABAL", b_lastname)) # file with 4129 rows
+  mutate(b_lastname = if_else(name %in% "JON, SOLAR", "SOLAR IRAZABAL", b_lastname))  %>%
+  mutate(b_lastname = if_else(b_lastname %in% "SERRANO", "SERRANO CANTADOR", b_lastname)) %>%#  modif edge.tsv  - added 05.08.2021 18:00
+  mutate(b_firstname = if_else(b_lastname %in% "CATHERINE", "CATHERINE", b_firstname), #  modif edge.tsv  - added 05.08.2021 18:00
+       b_lastname =  if_else(b_lastname %in% "CATHERINE", "BATIOT DUPEYRAT", b_lastname)) %>%
+  mutate(b_firstname = if_else(b_firstname %in% "KRIJN", "KRIJN P", b_firstname)) # modif in edge.tsv - O6.08.2021
+  
+# file with 4129 rows
 
 # remaining question: how does LILIANA A, RODRIGUEZ became	LILIANA, RODRIGUEZ and are we sure it is the same person? different city, same country, different year, different email address...
 
 out <- ncor %>%
-       distinct(b_firstname, b_lastname) # 3900 unique id # june 2021: 3893 unique id # issue: previousely: 3889
+       distinct(b_firstname, b_lastname) # 3884 unique id # previousely: 3889
 
 # reorder inversed names (from Dimensions) using Aissa's file "name_isgc_inverse"
 
@@ -289,17 +378,28 @@ n <- n %>%
 authors <- authors %>%
   left_join(select(n, idind, c_firstname, c_lastname)) # Joining, by = "idind"
 
-authors_abstracts <- authors_abstracts %>%
+authors_abstracts  <- authors_abstracts %>%
   left_join(authors) %>% # 6485 rows
   drop_na(c_lastname) %>% # remove NA (in a later stage try to find them in another table) --> 6459 rows (26 NA have been removed)
   unite("i", c_firstname:c_lastname, sep = ", ", remove = F) %>%
   distinct() # from 6459 rows to 6451
 
+ authors_abstracts %>%
+    distinct(i, first_name, family_name) %>%
+    write_tsv("authors.tsv")
 
-length(unique(authors_abstracts$i)) #3861 unique names
+authors_abstracts <- authors_abstracts %>% rename(family_name = c_lastname, first_name = c_firstname)
 
-write_tsv(authors_abstracts, "data-net/edges-2015-2019.tsv")
-authors_abstracts <- read_tsv("data-net/edges-2015-2019.tsv")
+# d <- authors_abstracts
+
+length(unique(authors_abstracts$i)) #3845 unique names
+
+authors_abstracts$institution[authors_abstracts$lastname %in% "ROBCIUC"]
+
+write_tsv(authors_abstracts, "data-net/edges-2015-2019-ok.tsv") #issue with TAB in the affiliation column - to be fixed : cf line ALEXANDRA ROBCIUC, 2017_1559_1431
+
+write_csv(authors_abstracts, "data-net/edges-2015-2019.csv")
+authors_abstracts <- read_tsv("data-net/edges-2015-2019-ok.tsv")
 
 ############################## ###################################################################################################
 
@@ -319,8 +419,8 @@ t <- group_by(d, i) %>%
   summarise(t_c = n_distinct(year)) %>%
   arrange(-t_c)
 
-table(t$t_c) # 151 participants went to all conferences, ~ 3253 went to only 1, 462 went to 2
-table(t$t_c > 1) / nrow(t) # ~ 84% were involved only 1 of 3 conferences in 5 years # FALSE: 0.8414382 TRUE: 0.1585618 
+table(t$t_c) # 152 participants went to all conferences, ~ 3230 went to only 1, 463 went to 2
+table(t$t_c > 1) / nrow(t) # ~ 84% were involved only 1 of 3 conferences in 5 years # FALSE: 0.840052 TRUE: 0.159948 
 
 # limiting ourselves to oral communications and flash communications panels
 d <- d %>%
@@ -331,8 +431,8 @@ t <- group_by(d, i) %>%
   summarise(t_c = n_distinct(year)) %>%
   arrange(-t_c)
 
-table(t$t_c) # 97 participants communicated to each conference, ~ 2014 communicated only once, 283 communicated twice
-table(t$t_c > 1) / nrow(t) # ~ 84% communicated only 1 of 3 conferences in 5 years # FALSE: 0.8412698 TRUE: 0.1587302
+table(t$t_c) # 97 participants communicated to each conference, ~ 2001 communicated only once, 284 communicated twice
+table(t$t_c > 1) / nrow(t) # ~ 84% communicated only 1 of 3 conferences in 5 years # FALSE: 0.8400504 TRUE: 0.1599496
 
 # number of OC and FC panels overall
 n_distinct(d$j) # 219
@@ -365,3 +465,4 @@ nbaut <- d  %>%
 # mean nb of authors per paper
 
 mean(nbaut$n) # 4.130841
+
