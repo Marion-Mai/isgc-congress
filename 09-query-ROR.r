@@ -28,7 +28,7 @@ d <- a %>%
   )
 
 # remove affiliations that have already been parsed
-f <- "data/ror-results.rds"
+f <- "data-net/ror-results.rds"
 if (fs::file_exists(f)) {
 
   d <- anti_join(d, readr::read_rds(f), by = "institution")
@@ -124,7 +124,7 @@ bind_cols(select(filter(d, ror_results > 0), -ror), r) %>%
   full_join(a, ., by = "institution") %>%
   # stable order
   arrange(institution) %>%
-  readr::write_tsv("data/ror-overview.tsv", na = "")
+  readr::write_tsv("data-net/ror-overview.tsv", na = "")
 
 cat(" done.\n")
 
