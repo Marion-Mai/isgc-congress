@@ -8,6 +8,8 @@ library(httr)
 library(stringi)
 library(jsonlite)
 
+# setwd("~/isgc/isgc-congress")
+
 # extract (likely) the first part of the first names --------------------------------------------
 
 # simple heuristics to get first names from (mostly) Western names
@@ -20,7 +22,8 @@ d <- fs::dir_ls("data", regexp = "all") %>% # equivalent to open https://github.
       # remove lonely initials in "J M"
         str_replace_all("^[A-Z]$", " ") %>%
       str_squish()
-      ) 
+      )  %>%
+  filter(! first %in% "")
 
 n <- select(d, first) %>%
   # just to be sure
@@ -43,6 +46,8 @@ if (!fs::file_exists(f)) {
     write_tsv(f)
 
 }
+
+read_tsv(f, col_types = "cccdi")
 
 repeat {
 
@@ -103,7 +108,7 @@ repeat {
     arrange(first)
 
   cat("", sum(!is.na(g$gender)), "guessed,", sum(is.na(g$gender)), "left\n")
-  write.table(x = g, file = f, sep = "\t")
+  write_tsv(g, f)
 
 }
 
