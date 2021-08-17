@@ -61,7 +61,7 @@ index <- index %>%
 index <- index %>%
   mutate(source = "ISGC")  %>%
   filter(! (original_firstname %in% "ANA M" & original_lastname %in% "MATIAS")) %>%
-  mutate(original_lastname = ifelse(original_lastname %in% "OÂNEILL", "O'NEILL", original_lastname))
+  mutate(original_lastname = ifelse(original_lastname %in% "OÂNEILL", "O'NEILL", original_lastname)) %>%
   bind_rows(
     .,
     tibble::tribble(
@@ -131,7 +131,7 @@ index <- index %>%
            str_remove_all("[\"^*`\\\\~]"))
 
 index %>%
-  write_tsv("data-net/authors_index_isgc.tsv")
+  write_tsv("data-net/authors-index-isgc.tsv")
 
 # is Kaufman Rechulski, Marcelo Daniel the same person as Kaufman Rechulski, Marcelo David? and therefore Kaufman Rechulski, Marcelo D.
 
