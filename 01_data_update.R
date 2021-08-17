@@ -394,6 +394,6 @@ length(unique(authors_abstracts$i)) #3832 unique names
 
 authors_abstracts %>%
   rename(first_name = c_firstname, family_name = c_lastname) %>%
-  write_tsv(authors_abstracts, "data-net/edges-2015-2019.tsv")
+  write_tsv("data-net/edges-2015-2019.tsv")
 
 authors_abstracts <- read_tsv("data-net/edges-2015-2019.tsv")
