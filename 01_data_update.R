@@ -1,5 +1,5 @@
 ## ISGC NETCONF SCRIPT 1 - SUNBELT 2020 - 01_data.R
-## first draft: 2020-07-14 Bastille Day; last edit: 2021-08-17
+## first draft: 2020-07-14 Bastille Day; last edit: 2021-08-26
 ## M. Maisonobe & F. Briatte
 
 # load libraries
@@ -388,7 +388,7 @@ authors_index <- select(authors, original_firstname, original_lastname, c_firstn
   rename(first_name = c_firstname, family_name = c_lastname) %>%
   drop_na() %>%
   distinct() %>%
-  write_tsv("data-net/authors-index.tsv")
+  write_tsv("index/authors-index-2015-2019.tsv")
 
 length(unique(authors_abstracts$i)) #3832 unique names
 

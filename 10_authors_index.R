@@ -2,9 +2,9 @@
 
 library(tidyverse)
 
-index_2013 <- read_tsv("data-net/index-isgc-authors-2013.tsv")
+index_2013 <- read_tsv("index/index-isgc-authors-2013.tsv")
 
-index <- read_tsv("data-net/authors-index.tsv") %>%
+index <- read_tsv("index/authors-index-2015-2019.tsv") %>%
   bind_rows(index_2013)  %>%
   distinct(original_firstname, original_lastname, first_name, family_name) %>%
   # deal with middle initials (put them at the end of the firstname string)
@@ -66,14 +66,14 @@ index <- index %>%
     .,
     tibble::tribble(
       ~ original_firstname, ~ original_lastname, ~ first_name, ~ family_name, ~ source,
-      "AUDREY", "DENICOURT", "AUDREY", "DENICOURT-NOWICKI", "other",
+      "AUDREY", "DENICOURT", "AUDREY", "DENICOURT NOWICKI", "other",
       "JOSE CLEITON", "SOUSA DOS SANTOS", "JOSE CLEITON S", "DOS SANTOS", "other", # https://orcid.org/0000-0002-1511-5180
       "SOLEDAD", "ASPROMONTE", "SOLEDAD GUADALUPE", "ASPROMONTE", "other",
       "JOHN FREDDY", "GELVES", "JOHN FREDDY", "GELVES DIAZ", "other", # https://orcid.org/0000-0002-1238-6911
-      "PEREAÑES-SACARÍAS", "JUAN ENRIQUE", "PEREANES-SACARIAS", "JUAN ENRIQUE", "other", # https://orcid.org/0000-0002-7147-9210
-      "PEREAÑES-SACARIAS", "JUAN ENRIQUE", "PEREANES-SACARIAS", "JUAN ENRIQUE","other", 
-      "PEREAÑES-SACARÍAS", "J E", "PEREANES-SACARIAS", "JUAN ENRIQUE", "other", 
-      "PEREAÑES-SACARIAS", "J E", "PEREANES-SACARIAS", "JUAN ENRIQUE","other", 
+      "PEREAÑES-SACARÍAS", "JUAN ENRIQUE", "PEREANES SACARIAS", "JUAN ENRIQUE", "other", # https://orcid.org/0000-0002-7147-9210
+      "PEREAÑES-SACARIAS", "JUAN ENRIQUE", "PEREANES SACARIAS", "JUAN ENRIQUE","other", 
+      "PEREAÑES-SACARÍAS", "J E", "PEREANES SACARIAS", "JUAN ENRIQUE", "other", 
+      "PEREAÑES-SACARIAS", "J E", "PEREANES SACARIAS", "JUAN ENRIQUE","other", 
       "MARIA E", "GALVEZ-PARRUCA", "MARIA ELENA", "GALVEZ PARRUCA","other", 
       "GLORIA ESTHER", "ALONSO SANCHEZ", "GLORIA ESTHER", "ALONSO","other", 
       "PAULO JOSÉ LOURENÇO", "ANDRÉ", "PAULO JOSE", "ANDRE","other", 
@@ -89,18 +89,18 @@ index <- index %>%
       "CORNELIS", "VAN DER WIJST", "CORNELIS G", "VAN DER WIJST", "other", 
       "RENÉE", "BAKKEMO", "RENEE", "BAKKEMO", "other", 
       "DÉSIX", "MADJINZA", "DESIX", "MADJINZA", "other", 
-      "BELÉN", "MAESTRO-MADURGA", "BELEN", "MAESTRO-MADURGA", "other", 
+      "BELÉN", "MAESTRO-MADURGA", "BELEN", "MAESTRO MADURGA", "other", 
       "MARLÈNE", "BEYERLE", "MARLENE", "BEYERLE", "other", 
       "ANDRIANARIVO IRÈNE", "RAHOBINIRINA", "ANDRIANARIVO IRENE", "RAHOBINIRINA", "other", 
       "A", "ALLOUACHE", "AMINA", "ALLOUACHE", "other", # Still a young researcher, her only publications are indexed online with her firstname's initial only
       "FÉLIX ARMANDO", "REANO", "FELIX ARMANDO", "REANO", "other", 
-      "JOANNA", "KRYŚCIAK-CZERWENKA", "JOANNA", "KRYSCIAK-CZERWENKA", "other", 
-      "J", "KRYŚCIAK-CZERWENKA", "JOANNA", "KRYSCIAK-CZERWENKA", "other", 
+      "JOANNA", "KRYŚCIAK-CZERWENKA", "JOANNA", "KRYSCIAK CZERWENKA", "other", 
+      "J", "KRYŚCIAK-CZERWENKA", "JOANNA", "KRYSCIAK CZERWENKA", "other", 
       "DARLIS ADRIANA", "VARÓN-CARDENAS", "DARLIS ADRIANA", "VARON CARDENAS", "other", 
       "NACERA", "LAHOUEL", "NACERA", "LAHOUEL BENABBES", "other", 
       "N", "LAHOUEL", "NACERA", "LAHOUEL BENABBES", "other", 
-      "HANI", "AL-NAJJAR", "HANY J", "AL-NAJJAR", "other", 
-      "HANY", "NAJJAR", "HANY J", "AL-NAJJAR", "other", # https://www.researchgate.net/profile/Hany-Najjar
+      "HANI", "AL-NAJJAR", "HANY J", "AL NAJJAR", "other", 
+      "HANY", "NAJJAR", "HANY J", "AL NAJJAR", "other", # https://www.researchgate.net/profile/Hany-Najjar
       "NORA", "TOUAHRI", "NOURA", "TOUAHRI", "other", 
       "JULIANA A", "SOUZA", "JULIANA", "DE SOUZA SARTORI", "other",
       "J AP", "DE SOUZA SARTORI", "JULIANA", "DE SOUZA SARTORI", "other",
@@ -131,7 +131,7 @@ index <- index %>%
            str_remove_all("[\"^*`\\\\~]"))
 
 index %>%
-  write_tsv("data-net/authors-index-isgc.tsv")
+  write_tsv("index/authors-index-isgc.tsv")
 
 # is Kaufman Rechulski, Marcelo Daniel the same person as Kaufman Rechulski, Marcelo David? and therefore Kaufman Rechulski, Marcelo D.
 
