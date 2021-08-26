@@ -33,7 +33,7 @@ n <- select(d, first) %>%
 # guess names via genderizer.io -------------------------------------------
 cat("Querying genderizer.io for", nrow(n), "first names...\n")
 
-f <- "data/genderizer-results.tsv"
+f <- "data-net/genderizer-results.tsv"
 if (!fs::file_exists(f)) {
 
   # init
@@ -94,6 +94,8 @@ repeat {
     # denote unknown genders as missing
     mutate(gender = str_replace_na(gender, "unknown")) %>%
     mutate(first = g$first, .before = 1)
+  
+  ff <- "data-net/genderizer-results-update.tsv"
 
   # reload names list
   g <- readr::read_tsv(f, col_types = "cccdi")
@@ -108,11 +110,11 @@ repeat {
     arrange(first)
 
   cat("", sum(!is.na(g$gender)), "guessed,", sum(is.na(g$gender)), "left\n")
-  write_tsv(g, f)
+  write_tsv(g, ff)
 
 }
 
-g <- readr::read_tsv(f, col_types = "cccdi")
+g <- readr::read_tsv(ff, col_types = "cccdi")
 
 cat(
   "Genders:",
