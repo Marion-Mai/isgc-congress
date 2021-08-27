@@ -3,8 +3,9 @@
 import graph_tool  # not used, but avoids an import order bug
 import abstractology
 import pandas as pd
+from .clean import clean_text
 
-graph_tool
+graph_tool  # just so the linter won't complain
 
 """ NOTES
 
@@ -43,14 +44,7 @@ graph_tool
 """
 
 
-def reload():
-    """Live reload while developing"""
-    import importlib
-
-    importlib.reload(abstractology)
-
-
-def get_data():
+def get_data(clean=True):
     df15 = pd.read_csv("abstracts_contents_2015.tsv", sep="\t")
     df15 = df15.dropna(subset=["abstract_text"])
     df17 = pd.read_csv("abstracts_contents_1719.tsv", sep="\t")
@@ -58,18 +52,21 @@ def get_data():
     df = df15.append(df17)
     df = df.reset_index()
 
+    if clean:
+        df["abstract_text"] = clean_text(df)
+
     return df
 
 
 def _load_data(a, get_data=get_data):
     a.data = get_data()
-    a.process_corpus(ngrams=1)  # no ngrams while I don't fix gensim on guix
     corpus_name = "isgc_2015-2017.df"
     if corpus_name not in a.loaded["data"]:
         a.loaded["data"].append(corpus_name)
         a.col_title = "abstract_title"
         a.col_time = "year"
         a.text_source = "abstract_text"
+    a.process_corpus(ngrams=1)  # no ngrams while I don't fix gensim on guix
 
 
 def bootstrap():
@@ -114,9 +111,6 @@ def main():
     except FileNotFoundError:
         a = bootstrap()
     plot(a)
-    a.data.columns
-    reload()
 
 
-if __name__ == "__main__":
-    main()
+main()
