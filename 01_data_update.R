@@ -75,7 +75,7 @@ authors <- authors %>%
 
 # reorder inversed names (from Dimensions) using Aissa's file + personnal additions "name_isgc_inverse"
 
-nameinv <- read_csv2("data-net/name_isgc_inverse.csv")  %>%
+nameinv <- read_csv("index/name_isgc_inverse.csv")  %>%
   select(-source) %>%
   rename(inv = id)
 
@@ -370,30 +370,35 @@ n %>%
 
 authors <- authors %>%
   left_join(select(n, b_firstname, b_lastname, c_firstname, c_lastname, init, middle)) %>%
-  distinct(firstname, lastname, .keep_all = T) # 4666 rows # Joining, by = c("b_firstname", "b_lastname") and removing duplicates in original names
-
+  distinct(firstname, lastname, .keep_all = T) %>% # 4666 rows # joining, by = c("b_firstname", "b_lastname") and removing duplicates in original names
+  rename(first_name = c_firstname, family_name = c_lastname) %>%
+  left_join(read_tsv("index/missing_firstnames.tsv"), by = c("first_name", "family_name")) %>%
+              mutate(first_name = ifelse(is.na(complete_firstname), first_name, complete_firstname)) %>%
+  select(-complete_firstname)
+  
 authors_abstracts  <- authors_abstracts %>%
-  left_join(select(authors, firstname, lastname, c_firstname, c_lastname, init, middle)
+  left_join(select(authors, firstname, lastname, first_name, family_name, init, middle)
             , by = c("firstname", "lastname")) %>% # 6485 rows
-  drop_na(c_lastname) %>% # remove NA (in a later stage try to find them in another table) --> 6459 rows (26 NA have been removed)
-  unite("i", c(c_firstname, c_lastname), sep = ", ", remove = F) %>%
+  drop_na(family_name) %>% # remove NA (in a later stage try to find them in another table) --> 6459 rows (26 NA have been removed)
+  unite("i", c(first_name, family_name), sep = ", ", remove = F) %>%
   distinct() # from 6459 rows to 6451
 
 authors_abstracts %>%
-  rename(first_name = c_firstname, family_name = c_lastname) %>%
+  write_tsv("data-net/edges-2015-2019.tsv")
+
+length(unique(authors_abstracts$i)) #3832 unique names
+
+authors_abstracts %>%
   distinct(i, first_name, family_name) %>%
   write_tsv("data-net/authors.tsv")
 
-authors_index <- select(authors, original_firstname, original_lastname, c_firstname, c_lastname) %>%
-  rename(first_name = c_firstname, family_name = c_lastname) %>%
+authors_index <- select(authors, original_firstname, original_lastname, first_name, family_name) %>%
   drop_na() %>%
   distinct() %>%
   write_tsv("index/authors-index-2015-2019.tsv")
 
 length(unique(authors_abstracts$i)) #3832 unique names
 
-authors_abstracts %>%
-  rename(first_name = c_firstname, family_name = c_lastname) %>%
-  write_tsv("data-net/edges-2015-2019.tsv")
+#################################################################################################################
 
 authors_abstracts <- read_tsv("data-net/edges-2015-2019.tsv")
