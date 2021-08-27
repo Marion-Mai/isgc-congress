@@ -105,6 +105,12 @@ index <- index %>%
       "JULIANA A", "SOUZA", "JULIANA", "DE SOUZA SARTORI", "other",
       "J AP", "DE SOUZA SARTORI", "JULIANA", "DE SOUZA SARTORI", "other",
       "J", "APERICIDA DE SOUZA SARTORI", "JULIANA", "DE SOUZA SARTORI", "other",
+      "CHRIS", "HARDACRE", "CHRISTOPHER", "HARDACRE", "other",
+      "LAURENCE", "CHOCINSKI ARNAULT", "LAURENCE", "CHOCINSKI", "other",
+      "KRISHNA D P", "NIGAM", "KRISHNA DEO PRASAD", "NIGAM", "other",
+      "EDITH", "NORRANT", "EDITH L", "NORRANT", "other",
+      "KULATHU", "SESHAN", "KULATHUIYER K", "SESHAN", "other",
+      "KULATHUYIER", "SESHAN", "KULATHUIYER K", "SESHAN", "other",      
       "BETHEL U", "UKAZU", "BETHEL UGOCHUKWU", "UKAZU", "other")) %>% # https://scholar.google.com/citations?user=3FC1BfMAAAAJ&hl=en
 
     # order the names
