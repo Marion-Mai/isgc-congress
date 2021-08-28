@@ -1,9 +1,11 @@
 #! /usr/bin/env python
 
 import graph_tool  # not used, but avoids an import order bug
+import sys
 import abstractology
 import pandas as pd
-from .clean import clean_text
+from .clean import clean_text, check_clean
+from pathlib import Path
 
 graph_tool  # just so the linter won't complain
 
@@ -44,16 +46,22 @@ graph_tool  # just so the linter won't complain
 """
 
 
+ISGC_FILES_DIR = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
+ISGC_2015_FILE = ISGC_FILES_DIR / "abstracts_contents_2015.tsv"
+ISGC_2017_FILE = ISGC_FILES_DIR / "abstracts_contents_1719.tsv"
+
+
 def get_data(clean=True):
-    df15 = pd.read_csv("abstracts_contents_2015.tsv", sep="\t")
+    df15 = pd.read_csv(ISGC_2015_FILE, sep="\t")
     df15 = df15.dropna(subset=["abstract_text"])
-    df17 = pd.read_csv("abstracts_contents_1719.tsv", sep="\t")
+    df17 = pd.read_csv(ISGC_2017_FILE, sep="\t")
     df17 = df17.dropna(subset=["abstract_text"])
     df = df15.append(df17)
     df = df.reset_index()
 
     if clean:
         df["abstract_text"] = clean_text(df)
+        df.dropna(subset=["abstract_text"], inplace=True)
 
     return df
 
@@ -106,11 +114,17 @@ def plot(a):
 
 
 def main():
-    try:
-        a = load()
-    except FileNotFoundError:
-        a = bootstrap()
-    plot(a)
+    action = sys.argv[2] if len(sys.argv) > 2 else "check_clean"
+    if action == "check_clean":
+        unclean = get_data(False)
+        clean = get_data(True)
+        check_clean(unclean.loc[clean.index], clean["abstract_text"])
+    elif action == "sashimi":
+        try:
+            a = load()
+        except FileNotFoundError:
+            a = bootstrap()
+        plot(a)
 
 
 main()
