@@ -57,7 +57,7 @@ authors <- authors %>%
   # keep track of the original form
   mutate(across(.cols = c(firstname, lastname), .fns = function(x) {str_to_upper(x) %>%
       str_replace_all("\\.", " ") %>%
-      str_remove_all("[*\\\\]") %>% 
+      str_remove_all("[*:\\\\]") %>% 
       str_replace_all("\\s+", " ")  %>% 
       str_remove_all("DR |PROF |PR | EXT$| EXTERIEUR$| IFF") %>% # remove titles: Prof, Dr, and other artefacts... (IFF stands for IFF - Instituto Federal Fluminense in Rio de Janeiro)
       str_trim }, .names =  "original_{col}")) %>%  # to keep track of the initials
@@ -66,11 +66,15 @@ authors <- authors %>%
     str_to_upper(x) %>%
       iconv(from = "UTF-8", to = "ASCII//TRANSLIT")  %>%
       str_replace_all("\\.", " ") %>% # to keep track of the initials
-      str_remove_all("[\"^'*`\\\\~]") %>%
+      str_remove_all("[\"^'*:`\\\\~]") %>%
       str_replace_all("-|\\s+", " ") %>%
       str_remove_all("DR |PROF |PR | EXT$| EXTERIEUR$| IFF") %>% # remove titles: Prof, Dr, and other artefacts... (IFF stands for IFF - Instituto Federal Fluminense in Rio de Janeiro)
       str_trim }, .names =  "a_{col}")) %>% 
   mutate(email = str_to_lower(email))  # file with 4947 rows
+
+# check for inversed names
+# upper_firstname <- authors %>%
+# filter(! str_detect(firstname, "[a-z]"))
 
 
 # reorder inversed names (from Dimensions) using Aissa's file + personnal additions "name_isgc_inverse"
@@ -93,7 +97,7 @@ authors <- authors %>%
 n <- authors %>%
   distinct(b_firstname, b_lastname, email) %>%
   group_by(b_firstname, b_lastname)  %>%
-  summarise(email = first(email), nb_email = n()) # file with 4074 rows
+  summarise(email = first(email), nb_email = n()) # file with 4066 rows
 
 n <- n %>%
   
@@ -254,7 +258,7 @@ n <- n %>%
 # are LUIS, SERRANO and LUIS, SERRANO CANTADOR the same person? does not seem so, different institution & country
 # are JON, SOLAR and JON, SOLAR IRAZABAL the same person? yes, same affiliation
 
-# 4072 lines
+# 4064 lines
 
 # After a visual screening of all these names and checking those giving no results in the databases BASE and SCOPUS, we found additional changes to make
 
@@ -302,6 +306,8 @@ n <-  n %>%
          c_lastname =  if_else(c_lastname %in% "FRANCA PENNA RIBEIRO", "RIBEIRO", c_lastname)) %>%
   mutate(c_firstname = if_else(c_lastname %in% "ASMELASH", "CHALACHEW ASMELASH", c_firstname), 
          c_lastname =  if_else(c_lastname %in% "ASMELASH", "MEBRAHTU", c_lastname)) %>%
+  mutate(c_firstname = if_else(c_lastname %in% "SEUANES SERAFIM", "LUISA S", c_firstname), 
+         c_lastname =  if_else(c_lastname %in% "SEUANES SERAFIM", "SERAFIM", c_lastname)) %>%
   mutate(c_firstname = if_else(c_lastname %in% "HAQUE MD", "MD ARIFUL", c_firstname), 
          c_lastname =  if_else(c_lastname %in% "HAQUE MD", "HAQUE", c_lastname)) %>% # https://scholar.google.com.hk/citations?user=rSpUq7AAAAAJ&hl=en ; https://www.researchgate.net/profile/Md-Haque-55
   
@@ -359,10 +365,10 @@ n <- n %>%
 
 # %>% write_tsv(n, "authors.tsv")
 
-# file with 4072 rows
+# file with 4064 rows
 
 n %>%
-  distinct(c_firstname, c_lastname) # 3832 unique id # previously: 3889
+  distinct(c_firstname, c_lastname) # 3823 unique id # previously: 3889
 
 # remaining question: how does LILIANA A, RODRIGUEZ became	LILIANA, RODRIGUEZ and are we sure it is the same person? different city, same country, different year, different email address...
 
@@ -386,7 +392,7 @@ authors_abstracts  <- authors_abstracts %>%
 authors_abstracts %>%
   write_tsv("data-net/edges-2015-2019.tsv")
 
-length(unique(authors_abstracts$i)) #3832 unique names
+length(unique(authors_abstracts$i)) #3823 unique names
 
 authors_abstracts %>%
   distinct(i, first_name, family_name) %>%
@@ -397,7 +403,7 @@ authors_index <- select(authors, original_firstname, original_lastname, first_na
   distinct() %>%
   write_tsv("index/authors-index-2015-2019.tsv")
 
-length(unique(authors_abstracts$i)) #3832 unique names
+length(unique(authors_abstracts$i)) #3823 unique names
 
 #################################################################################################################
 
