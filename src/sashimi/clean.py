@@ -11,7 +11,7 @@ CLEAN_REFLAGS = re.IGNORECASE | re.MULTILINE | re.DOTALL | re.VERBOSE
 def clean_text(df):
     """
     Known untreated entries:
-    964: "The research was co-financed"
+    - some title plus authors headers with no clear separation
     """
 
     def and_sections(re0, re1):
@@ -59,7 +59,7 @@ def clean_text(df):
         + r") (?: \ * section)? (?: [^\n\w]* \n | \s* [^\n\w\s,&]+ )",
     ]
     unclean_until_end_of_text_res = [
-        r"^" + section_numbering_re + r"acknowledge?ments? :? .*",
+        r"^" + section_numbering_re + r"ac?knowled?ge?ments? :? .*",
         r"^" + section_numbering_re + r"r[eé]f[eé]rences? \s* :? .*",
         r"^ [^\n\w]* [12] [^\n\w]+ \w [^\n]+ (?<!\d)(?:1[6789]|20)[0-9]{2}(?!\d) .*",
     ]
@@ -70,6 +70,20 @@ def clean_text(df):
         flags=CLEAN_REFLAGS,
     )
     clean_abstract_text = clean_df["abstract_text"].str.replace(unclean_rx, "")
+
+    # Remove even more funding info (max 61) excluding (10) manually identified wrong matches
+    clean_extra_funding_rx = re.compile(
+        r"(^ [^\n]*"
+        r"(?: fund[eis] | financ | supported\ by | support\ of | support\ from | grant )"
+        r"[^\n]* \s* ) \Z",
+        flags=CLEAN_REFLAGS,
+    )
+    up_index = clean_abstract_text.index.difference(
+        [23, 968, 999, 1243, 1373, 1416, 1469, 1560, 1700, 1710]
+    )
+    clean_abstract_text = clean_abstract_text.loc[up_index].str.replace(
+        clean_extra_funding_rx, ""
+    )
 
     return clean_abstract_text
 

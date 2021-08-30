@@ -53,7 +53,7 @@ def get_data(file_paths, clean=True):
     
     if clean:
         df["abstract_text"] = clean_text(df)
-        df.dropna(subset=["abstract_text"], inplace=True)
+        df = df.dropna(subset=["abstract_text"])
         print(f" Kept {len(df)} entries after cleaning.")
 
     df.index.name = "index"
