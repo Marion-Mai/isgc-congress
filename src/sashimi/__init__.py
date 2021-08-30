@@ -42,7 +42,7 @@ from .clean import clean_text
 def get_data(file_paths, clean=True):
     df = pd.concat(
         [
-            pd.read_csv(file, sep="\t")
+            pd.read_csv(file, sep="\t", dtype=str)
             for file in file_paths
         ],
         ignore_index=True,
@@ -56,4 +56,5 @@ def get_data(file_paths, clean=True):
         df.dropna(subset=["abstract_text"], inplace=True)
         print(f" Kept {len(df)} entries after cleaning.")
 
+    df.index.name = "index"
     return df
