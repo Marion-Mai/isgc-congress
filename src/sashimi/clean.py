@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+import pandas as pd
 from difflib import unified_diff
 from itertools import permutations
 
@@ -31,6 +32,7 @@ def clean_text(df):
         r"introductions?",
         r"materials?",
         r"methods?",
+        r"motivation?",
         r"perspectives?",
         r"prospects?",
         r"objectives?",
@@ -43,18 +45,22 @@ def clean_text(df):
         [and_sections(x, y) for x, y in permutations(section_names_res, 2)]
         + section_names_res
     )
-
+    section_numbering_re = r"[^\n\w]* (?: \d? [^\n\w]* )"
     # Remove invalid content from entries
     unclean_from_start_of_text_res = [
-        r".* \n abstract (?: [^\n\w,]* \n)",
+        r"(?: ^ | .* \n)" + section_numbering_re + r"abstract (?: [^\n\w,]* \n)",
     ]
     unclean_res = [
-        r"^ keys?\ ?words? (?: [^\n\w]* \n )? [^\n]*",
-        r"(^ (?:" + section_names_re + r") (?: [^\n\w]* \n | \s* [^\n\w\s,&]+ ))",
+        r"^" + section_numbering_re + r"keys?\ ?words? (?: [^\n\w]* \n )? [^\n]*",
+        r"^"
+        + section_numbering_re
+        + r"(?:"
+        + section_names_re
+        + r") (?: \ * section)? (?: [^\n\w]* \n | \s* [^\n\w\s,&]+ )",
     ]
     unclean_until_end_of_text_res = [
-        r"^ acknowledge?ments? :? .*",
-        r"^ r[eé]f[eé]rences? \s* :? \s* \n .*",
+        r"^" + section_numbering_re + r"acknowledge?ments? :? .*",
+        r"^" + section_numbering_re + r"r[eé]f[eé]rences? \s* :? .*",
         r"^ [^\n\w]* [12] [^\n\w]+ \w [^\n]+ (?<!\d)(?:1[6789]|20)[0-9]{2}(?!\d) .*",
     ]
     unclean_rx = re.compile(
@@ -68,17 +74,35 @@ def clean_text(df):
     return clean_abstract_text
 
 
-def check_clean(df, clean_abstract_text, start=0):
-    comp = df["abstract_text"].compare(clean_abstract_text)
-    for idx, diff in comp.agg(
+def check_clean(df_or_series, clean_abstract_text, start=0, interactive=True):
+    """Compares two textual series showing diffs for each entry.
+
+    If passed a dataframe as first argument, picks the "abstract_text" column.
+    If `start` is provided, skips abstracts indexed less than its value.
+    If not `interactive`, returns the diffs as a `pandas.Series`
+    If `interactive`, waits for input at each entry, stopping if sent a nonempty string.
+    """
+    if not isinstance(df_or_series, pd.Series):
+        abstract_text = df_or_series["abstract_text"]
+    else:
+        abstract_text = df_or_series
+    abstract_text = abstract_text.loc[clean_abstract_text.index]
+    comp = abstract_text.compare(clean_abstract_text)
+    if comp.empty:
+        print("No differences found.")
+        return
+    diff = comp.agg(
         lambda x: unified_diff(x["self"].split("\n"), x["other"].split("\n")), axis=1
-    ).items():
-        if idx < start:
-            continue
+    )
+    if not interactive:
+        return diff.map("\n".join)
+    print(f"Found {len(diff)} modified documents.\n")
+    for idx, diff in diff.loc[start:].items():
         for line in diff:
             print(line)
         print("\n" + 70 * "-" + str(idx) + "\n")
         if input():
+            print("\nInterrupted!\n")
             break
 
 
