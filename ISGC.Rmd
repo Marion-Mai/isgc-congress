@@ -16,16 +16,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r , echo = FALSE, message = F, warning = F}
 
+# tinytex::install_tinytex()
+library(tinytex)
 library(tidyverse)
 library(kableExtra)
 library(ggalluvial)
 library(knitr)
-library(tnet)
-library(igraph)
 library(ggraph)
 library(RColorBrewer)
 library(circlize)
+
+# library(tnet)
+library(igraph)
 library(cartography)
+
 
 abstracts <- read_tsv("data/abstracts-2015-2019.tsv")
 authors_abstracts <- read_tsv("data-net/edges-2015-2019.tsv")
@@ -40,7 +44,7 @@ In the frame of the NETCONF research project we focus on several editions of the
 ```{r , echo = FALSE, message = F, warning = F}
 
 # keep OC (Oral Communications) and FC (Flash Communications) only
-ocfc <- abstracts %>%
+ocfc <- abstracts %>% 
   filter(final_status %in% c("OC","FC", "FC - PC", "OC - PC"))
 
 # count number of com per topic
@@ -75,12 +79,14 @@ tab_1 <- ocfc %>%
 We first look at the topics associated to flash and oral communications given at the ISGC congress over time. We notice that `r tab_1$topic_1[1]` is the more popular topic. It attracted `r tab_1$n_2019[1]` communications at the 2019 edition. However, we notice that certain topics are not represented at every ISGC editions. It is notably the case of `r tab_1$topic_1[1]` which was not present at the 2017 edition. During the 2017 edition, it appears that `r tab_1$topic_1[1]` has been temporarily replaced by another category named `r tab_1$topic_1[2]` (see Table 1 below).
 
 ```{r , echo = FALSE, message = F, warning = F}
-tab_1 %>% # add_row = unsatisfying solution
-    add_row(topic_1 = "Total", n_2015 = sum(tab_1$n_2015), prct_2015 = round(sum(tab_1$prct_2015), 0), n_2017 = sum(tab_1$n_2017), 
-            prct_2017 = round(sum(tab_1$prct_2017), 0), n_2019 = sum(tab_1$n_2019), prct_2019= round(sum(tab_1$prct_2019), 0), 
-            total_nb = sum(tab_1$total_nb), total_prct = round(sum(tab_1$total_prct), 0))%>% 
+
+tab_1 %>% 
+    add_row(summarise(., # add the totals by columns
+                      across(where(is.numeric), sum), # numeric totals
+                      across(where(is.character), ~"Total")) %>% # write "Total" at the end of the 1st column
+              mutate(across(starts_with("prct_"), round, 0))) %>%  # round the %
     kbl(col.names = NULL) %>%
-    add_header_above(c("ISGC topic", "Nb" = 1, "%" = 1, "Nb" = 1, "%" = 1, "Nb" = 1, "%" = 1, "Nb" = 1, "%" = 1)) %>%
+    add_header_above(c("ISGC topic", rep(c("Nb", "%"), 4))) %>%
     add_header_above(c(" ", "2015" = 2, "2017" = 2, "2019" = 2, "Total" = 2)) %>%
     add_header_above(c(" ", "Number and % of oral and flash communications" = 8)) %>%
     kable_classic(full_width = F, html_font = "Cambria") %>%
@@ -168,15 +174,18 @@ There are different ways of approaching the conference participation. It can be 
 In what follows, we consider the participation through the lens of all communications' authors, whether they registered or not.
 
 ```{r , echo = FALSE, message = F, warning = F}
+
 # keeping everyone including industrials and keynote speakers
 
 d <- authors_abstracts  %>%
      mutate(year = as.numeric(year))
 
 # how many participations over the 3 conferences?
+
 t <- group_by(d, i) %>%
   summarise(t_c = n_distinct(year)) %>%
   arrange(-t_c)
+
 ```
 
 By counting all the speakers including industrials and keynote speakers over the 3 editions of the congress, we find a total of `r length(t$i)` participants. Among them, `r dim(filter(t, t$t_c %in% 3))[1]` were represented at all editions, `r dim(filter(t, t$t_c %in% 1))[1]` intervened to 1 edition only, (i.e. `r round(dim(filter(t, t$t_c %in% 1))[1]/length(t$i)*100, 2)`%), and `r dim(filter(t, t$t_c %in% 2))[1]` contributed to 2 editions.
@@ -184,10 +193,12 @@ By counting all the speakers including industrials and keynote speakers over the
 ```{r , echo = FALSE, message = F, warning = F}
 
 # limiting ourselves to oral communications and flash communications panels
+
 d <- d %>%
   filter(final_status %in% c("OC","FC", "FC - PC", "OC - PC"))
 
 # how many participations to OC and FC over the 3 conferences?
+
 t <- group_by(d, i) %>%
      summarise(t_c = n_distinct(year)) %>%
      arrange(-t_c)
@@ -197,6 +208,7 @@ t <- group_by(d, i) %>%
 If we limit ourselves to participants to oral communications and flash communications panels, we find a total of `r length(t$i)` participants. Among them, `r dim(filter(t, t$t_c %in% 3))[1]` were represented at all editions, `r dim(filter(t, t$t_c %in% 1))[1]` intervened to 1 edition only, (i.e. `r round(dim(filter(t, t$t_c %in% 1))[1]/length(t$i)*100, 2)`%), and `r dim(filter(t, t$t_c %in% 2))[1]` contributed to 2 editions.
 
 ```{r , echo = FALSE, message = F, warning = F}
+
 # number of OC and FC panels overall
 
 t <- distinct(d, j, .keep_all = T) %>%
@@ -205,12 +217,14 @@ t <- distinct(d, j, .keep_all = T) %>%
 
 # add number of panels intervention per conference
 # (useful for edge weighting)
+
 d <- group_by(d, year, i) %>%
   summarise(n_p = n()) %>%
   inner_join(d, ., by = c("year", "i"))
 
 # add total number of panels and total number of conferences with at least one communication
 # (useful for vertex subsetting)
+
 d <- group_by(d, i) %>%
      summarise(t_p = n_distinct(j), t_c = n_distinct(year)) %>%
      inner_join(d, ., by = "i")
@@ -265,7 +279,8 @@ Are there more and more multi-positional participants - degree 2+ in these bipar
 
 tab_3 %>% 
     kbl(col.names = NULL) %>%
-    add_header_above(c("ISGC Congress", "Panels" = 1, "Participants" = 1, "Ratio" = 1, "% degree 1" = 1, "% degree 2+" = 1, "C - 1" = 1)) %>%
+    add_header_above(c("ISGC Congress", "Panels" = 1, "Participants" = 1, 
+                       "Ratio" = 1, "% degree 1" = 1, "% degree 2+" = 1, "C - 1" = 1)) %>%
     kable_classic(full_width = F, html_font = "Cambria") %>%
     column_spec(c(5, 6), italic = T) # format first column
 
@@ -313,11 +328,11 @@ f <- left_join(d, select(abstracts, Idu, topic_1), by = "Idu" ) %>%
 
 net <- select(f, e = a_id, p = p_id)  %>% distinct() #correction (2021-06-22)
 
-onemode <- projecting_tm(net, method = "sum")
+onemode <- tnet::projecting_tm(net, method = "sum")
 
 # Transform the result into an igraph object
 
-g <- graph_from_data_frame(cbind(onemode$i, onemode$j), directed = FALSE)
+g <- igraph::graph_from_data_frame(cbind(onemode$i, onemode$j), directed = FALSE)
 
 E(g)$weight <- as.double(onemode$w)
 

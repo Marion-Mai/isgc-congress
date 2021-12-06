@@ -7,12 +7,11 @@
 # --------------------------------------------------------------------------------------------------------
 # AFSP equivalent: https://github.com/briatte/congres-afsp/blob/master/02_two_mode_networks.r
 
-library(dplyr)
-library(tidyr) # for unite, separate
 library(igraph)
 library(ggraph)
 library(graphlayouts)
 library(tidyverse)
+library(scales)
 
 
 # [NOTE] we use a stress majorization layout because all graphs have several
@@ -54,7 +53,7 @@ stopifnot(colSums(m) > 1) # # 2015 - 2019 --> issue: Erreur : colSums(m) > 1 ne 
 
 # weight = 1 / (total number of panel participants)
    w <- apply(m, 2, function(x) { x / sum(x) }) # \in (0, 0.5] # for bipartite plots
-#   w <- m # for backbones
+ # w <- m # for backbones
 
 # ==============================================================================
 # BIPARTITE NETWORK PLOTS
@@ -103,7 +102,7 @@ for (i in rev(y)) {
     geom_node_point(aes(size = size, shape = type, color = type), alpha = 2/3) +
     scale_shape_manual("", values = c("P0" = 15, "P1" = 19, "P2" = 19), labels = l) +
     scale_color_manual("", values = c("P0" = "grey35", "P1" = "steelblue3", "P2" = "tomato3"), labels = l) +
-    guides(size = FALSE) +
+    guides(size = "none") +
     theme_graph(base_family = "Helvetica", base_size = 14) +
     theme(
       legend.text = element_text(size = rel(1)),
@@ -121,8 +120,11 @@ for (i in rev(y)) {
       )
     )
 
-  ggsave(str_c("plots/congres-isgc", i, "-2mode.pdf"), width = 8, height = 9)
-  ggsave(str_c("plots/congres-isgc", i, "-2mode.png"), width = 8, height = 9, dpi = 150)
+ ggsave(str_c("plots/congres-isgc", i, "-2mode.pdf"), width = 8, height = 9)
+  ggsave(str_c("plots/congres-isgc", i, "-2mode.png"), type = "cairo-png", 
+               width = 8, height = 9)
+  
+
 
 }
 
@@ -131,38 +133,44 @@ for (i in rev(y)) {
 
 readr::write_rds(w, "data-net/incidence_matrix.rds")
 
-t <- bind_rows(t_2015, t_2017, t_2019)
+
+
+t <- bind_rows(t_2015, t_2017, t_2019)  
 t_c <- rbind(components_2015, components_2017, components_2019)
 t_p <- rbind(p_2015, p_2017, p_2019)
-t <- bind_cols(year = seq(2015, 2019, by = 2), t, C = t_c, P = t_p)
+tt <- bind_cols(year = seq(2015, 2019, by = 2), t, C = t_c, P = t_p) %>%
+  mutate(across(where(is.numeric), as.numeric, .names = "{col}"))
 
-readr::write_tsv(t, "data-net/table.tsv")
+readr::write_tsv(tt, "data-net/table.tsv")
 
 #Year 2015 : 9 components
 
 'P0  P1  P2
- 64 781  94 '
+ 64 780  94 '
 
 'Edge weights:
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-0.03333 0.04348 0.05263 0.06426 0.07143 1.00000'
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.03333 0.04348 0.05263 0.06426 0.07143 1.00000 '
 
 #Year 2017 : 8 components
 
 'P0  P1  P2
- 78 890 135'
+ 78 872 137'
 
 'Edge weights:
-  Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-0.1613  0.2174  0.2941  0.3189  0.3571  1.0000'
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.1613  0.2174  0.2941  0.3226  0.3846  1.0000 '
 
 #Year 2019 : 5 components
 
 'P0  P1  P2
- 77 837 145  '
+ 77 812 149  '
 
 'Edge weights:
-    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  0.1481  0.1905  0.2500  0.2573  0.3077  1.0000'
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.1111  0.1500  0.1875  0.1956  0.2308  1.0000'
 
 # kthxbye
+
+warnings()
+

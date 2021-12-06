@@ -2,9 +2,7 @@
 ## 2020-07-14 Bastille Day
 ## M. Maisonobe & F. Briatte
 
-library(dplyr) # for select and %>% + loads tibbles
-library(purrr) # for map()
-library(readr) # for read_csv
+library(tidyverse)
 
 library(geonames)
 #https://geonames.wordpress.com/page/2/
@@ -114,12 +112,14 @@ unfoundr %>%
 rclean <- read_tsv(countrydf2) %>% filter(!country_src %in% c("CEDEX", "FR", "MILANO")) %>% # check "GERMANY/FRANCE" - one lines for two addresses -->
                                                                                   # I later include two rows in the recipe table: GERMANY/FRANCE --> GERMANY and GERMANY/FRANCE --> FRANCE
   group_by(country_src) %>%
-  slice(ifelse(!(country_src %in% c("MADRID", "N IRELAND, UK", "TAIWAN, R.O.C.", "THE NETHERLAND", "WA")), 1,
+  slice(ifelse(!(country_src %in% c("MADRID", "TAIWAN, R.O.C.", "THE NETHERLAND", "WA")), 1,
                ifelse((country_src %in% c("TAIWAN, R.O.C.", "THE NETHERLAND")), 2,
-                      ifelse((country_src %in% c("N IRELAND, UK")), 3,
+                      ifelse((country_src %in% c("N IRELAND, UK", "N IRELAND, UK")), 3,
                              7)))) %>%
   distinct() %>%
-  mutate(countryname = replace(countryname, country_src %in% "P. R. CHINA", "China"),
+  mutate(countryname = replace(countryname, country_src %in% c("P. R. CHINA", 
+                                                               "P. R. CHINA.",
+                                                               "P.R. CHINA"), "China"),
          ISO2 = replace (ISO2, country_src %in% "P. R. CHINA", "CN")) %>%
   rename(ISO2_dest = ISO2, country_dest = countryname)
 
@@ -159,6 +159,7 @@ recipe <- countrydfclean2 %>%
     "GERMANY/FRANCE", "France", "FR"))
 
 write_tsv(recipe, "data/geonames-recipe-countries.tsv")
+recipe <- read_tsv("data/geonames-recipe-countries.tsv")
 
 ########################################## back to the main database ####################################################
 # following step: CITY SEARCH
@@ -186,27 +187,32 @@ cities <- cities %>% drop_na() %>% distinct()
 
 write_tsv(cities, "data/cities.tsv")
 
+cities <- read_tsv("data/cities.tsv")
+
 citiesdf <- "data/geonames-cities.rds"
 # citiesdf <- "data/geonames-cities.tsv"
 
 if (!file.exists(citiesdf)) {
 
-  cities %>%
+c <-  cities %>%
   split(.$city) %>%
-  map( ~ GNsearch(name = .x$city, country = .x$ISO2_dest, featureClass = "P", fuzzy = 1)) %>%
+  map( ~ GNsearch(name = .x$city, country = .x$ISO2_dest, featureClass = "P", fuzzy = 1)) 
+
+c %>%
   compact() %>%
   map_dfr(~ .x %>% as_tibble(), .id = "city_src")  %>% # (.)
-  full_join(country, by = c("city_src" = "city")) %>% #"country_src"
+  full_join(cities, by = c("city_src" = "city")) %>% #"country_src"
   rename(cityname = toponymName,
-         provincename = adminName,
+         provincename = adminName1,
          countryname = countryName,
          long = lng,
          lat = lat) %>%
-  select(cityname, provincename, countryname, long, lat)%>%
+  select(city_src, cityname, provincename, countryname, long, lat)%>%
   distinct() %>%
-  write_rds(citiesdf, "data/geonames-cities.rds")
+  write_rds(citiesdf, compress = "none")
 
   }
 
 citiesdf <- read_rds(citiesdf)
+
 

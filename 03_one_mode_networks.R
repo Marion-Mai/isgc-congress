@@ -109,19 +109,19 @@ for (y in unique(d$year)) {
 
 }
 
-# Year 2019 : 6 components
+# Year 2019 : 5 components
 
 'P1 P2+
-830 149'
+812 149'
 
 # Year 2017 : 8 components
 
 'P1 P2+
-883 135'
+872 137'
 
 # Year 2015 : 8 components
 
 'P1 P2+
-  780  94'
+  779  94'
 
 # kthxbye

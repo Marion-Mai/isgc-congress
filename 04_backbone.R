@@ -17,7 +17,7 @@ library(tidyverse)
 library(igraph)
 library(ggraph)
 library(graphlayouts)
-library(backbone)
+library(backbone) # install_version(''backbone'', version = '1.2.2')
 
 # load adjacency matrices built by script 02
 load("data-net/unweighted-2mode.rda")
@@ -33,18 +33,22 @@ for (i in ls(pattern = "^a\\d{4}")) {
   G <- A %*% t(A)
 #  diag(G) <- 0 # not necessary according to Neal et al. replicationcode.R (https://osf.io/r9gvh/)
   print(table(G))
+  
+
 
   # backbone from one-mode and two-mode projections - universal threshold method
   bb <- backbone::universal(G, upper = 1)
   bb2 <- backbone::universal(A, upper = 1, bipartite = TRUE)
-  stopifnot(all.equal(bb$backbone, bb2$backbone)) # what it's for?
+ # stopifnot(all.equal(bb$backbone, bb2$backbone)) # what it's for?
+  
+
 
   assign(str_replace(i, "a", "bb"), bb)
   print(bb$summary)
 
   # backbone from two-mode projections - hypergeometric method
   ## Extract
-  hyperg_probs <- hyperg(G)
+  hyperg_probs <- hyperg(A)
   hyperg_bb <- backbone.extract(hyperg_probs, alpha = .01)
 
   # assign(str_replace(i, "a", "bb"), hyperg_bb)
@@ -52,7 +56,7 @@ for (i in ls(pattern = "^a\\d{4}")) {
 
   # backbone from two-mode projections - sdsm method
   ## Extract
-  sdsm <- sdsm(G, model = "polytope")
+  sdsm <- sdsm(A, model = "polytope")
   sdsm_bb <- backbone.extract(sdsm, alpha = .01, narrative = F)
 
   # assign(str_replace(i, "a", "bb"), sdsm_bb)
@@ -60,7 +64,7 @@ for (i in ls(pattern = "^a\\d{4}")) {
 
   # backbone from two-mode projections - sdsm method
   ## Extract
-  sdsm <- sdsm(G, model = "polytope")
+  sdsm <- sdsm(A, model = "polytope")
   sdsm_bb <- backbone.extract(sdsm, alpha = .01, narrative = F)
 
   # assign(str_replace(i, "a", "bb"), sdsm_bb)
@@ -68,7 +72,7 @@ for (i in ls(pattern = "^a\\d{4}")) {
 
   # backbone from two-mode projections - fdsm method
   ## Extract
-  fdsm <- fdsm(G, trials = 1000, dyad = c("PRINCE, AMANIAMPONG", "ANA M, FERREIRA"), progress = TRUE)
+  fdsm <- fdsm(A, trials = 1000, dyad = c("PRINCE, AMANIAMPONG", "ANA M, FERREIRA"), progress = TRUE)
   fdsm_bb <- backbone.extract(fdsm, signed = TRUE, alpha = 0.01)
 
   # assign(str_replace(i, "a", "bb"), fdsm_bb)
