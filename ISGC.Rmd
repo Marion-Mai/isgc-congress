@@ -28,11 +28,11 @@ library(circlize)
 
 # under-dev package
 #library(tnet)
-#library(igraph)
 #library(cartography)
 #library(usethis)
 # install.packages("cartigraph_0.0.0.9000.tar.gz", repos = NULL, type = "source")
 
+library(igraph)
 library(cartigraph)
 
 
@@ -316,6 +316,15 @@ f <- left_join(d, select(abstracts, Idu, topic_1), by = "Idu" ) %>%
                 "Non-thermal activation methods" = "New technologies"
                 ))
 
+# number of participants with at least two communications
+
+nmp <- f %>% 
+  count(i) %>%
+  filter(n > 1) %>%
+  nrow(.)
+  
+# network of Oral and flash communications with at least one common author
+
 net <- select(f, p = a_id, e = i)  %>% distinct()
   
 # From 2-mode to 1-mode, this function transform the result into an igraph object
@@ -341,7 +350,7 @@ plot(g, vertex.label = NA, vertex.size = 1)
 
 ```
 
-It counts `r length(V(g))` communications, among which `r length(V(g)[year == "2015"])` from the 2015 edition, `r length(V(g)[year == "2017"])` from the 2017 edition, and `r length(V(g)[year == "2019"])` from the 2019 edition.
+It counts `r length(V(g))` communications (on a total of `r max(f$a_id)`, among which `r length(V(g)[year == "2015"])` from the 2015 edition, `r length(V(g)[year == "2017"])` from the 2017 edition, and `r length(V(g)[year == "2019"])` from the 2019 edition. It involves `r nmp` participants. 
 
 ```{r ,  echo = FALSE, message = F, warning = F}
 
@@ -509,7 +518,9 @@ knitr::include_graphics("plots/Topics_network_recoded_cartigraph.svg") # affiche
 
 ```
 
+## Individual trajectory
 
+We focus on the specific case of PNA. A researcher who started his career in Singapore and then moved to Poitiers, in France where he was first hired as a postdoctoral researcher, and latter on succeeded to get a permanent position at the CNRS. Here is a subset of the network of communications involving this author. We notice that certain of his co-authors are not correctly indexed in the ISGC database, which means that we have to be very careful when interpreting coauthorship data derived from this source.
 
 ```{r ,  echo = FALSE, message = F, warning = F}
 
@@ -538,3 +549,5 @@ plot(cg, vertex.label = str_c(V(cg)$rtopic, V(cg)$year, sep = "_"))
 pnacom <- f %>% filter(a_id %in% c("13", "242", "610", "693"))
 
 ```
+
+
