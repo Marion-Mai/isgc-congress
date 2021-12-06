@@ -26,9 +26,14 @@ library(ggraph)
 library(RColorBrewer)
 library(circlize)
 
-# library(tnet)
-library(igraph)
-library(cartography)
+# under-dev package
+#library(tnet)
+#library(igraph)
+#library(cartography)
+#library(usethis)
+# install.packages("cartigraph_0.0.0.9000.tar.gz", repos = NULL, type = "source")
+
+library(cartigraph)
 
 
 abstracts <- read_tsv("data/abstracts-2015-2019.tsv")
@@ -149,19 +154,6 @@ ggplot(allu_1,
   ggtitle("Number of communications per ISGC topic")
 
 # dev.off()
-
-## alternative alluvial plot (option no 2)
-# ggplot(data = allu_1,
- #      aes(x = year, y = n, alluvium = topic_1, label = topic_1)) +
- # geom_alluvium(aes(fill = topic_1, colour = topic_1),
-              #  alpha = .75, decreasing = FALSE) +
- # scale_x_discrete(expand = c(.1, .1)) +
- # theme_bw() +
- # theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
-  # scale_fill_brewer(type = "qual", palette = "Set3") +
-  # scale_color_brewer(type = "qual", palette = "Set3") +
-  # facet_wrap(~ region, scales = "fixed") +
- # ggtitle("Number of communications per ISGC topics over time")
 
 ```
 
@@ -312,8 +304,6 @@ include_graphics("plots/congres-isgc2019-1mode.png")
 f <- left_join(d, select(abstracts, Idu, topic_1), by = "Idu" ) %>%
      group_by(Idu) %>%
      mutate(a_id = cur_group_id())  %>% ungroup()  %>% 
-     group_by(i) %>%
-     mutate(p_id = cur_group_id())  %>% ungroup()  %>%
      mutate(rtopic = recode(topic_1, "Renewable carbon" = "Biomass conversion", 
                 "Waste valorization" = "Biomass conversion",
                 "Chemical valorization of wastes" = "Biomass conversion",
@@ -326,20 +316,10 @@ f <- left_join(d, select(abstracts, Idu, topic_1), by = "Idu" ) %>%
                 "Non-thermal activation methods" = "New technologies"
                 ))
 
-net <- select(f, e = a_id, p = p_id)  %>% distinct() #correction (2021-06-22)
-
-onemode <- tnet::projecting_tm(net, method = "sum")
-
-# Transform the result into an igraph object
-
-g <- igraph::graph_from_data_frame(cbind(onemode$i, onemode$j), directed = FALSE)
-
-E(g)$weight <- as.double(onemode$w)
-
-# sum(onemode$w)
-
-# Remove multiple lines
-g <- simplify(g, remove.multiple = TRUE, edge.attr.comb = c(weight = "first", type = "ignore"))
+net <- select(f, p = a_id, e = i)  %>% distinct()
+  
+# From 2-mode to 1-mode, this function transform the result into an igraph object
+g <- cartigraph::netproj(net, method = "sum")
 
 V(g)$topic <- as.character(f$topic_1[match(V(g)$name, f$a_id)])
 V(g)$rtopic <- as.character(f$rtopic[match(V(g)$name, f$a_id)])
@@ -509,103 +489,28 @@ gtop <- simplify(contracted_g, remove.multiple = TRUE, remove.loops = T,
 
 V(gtop)$label <- as_vector(str_remove_all(str_trunc(V(gtop)$rtopic, 16, "right"), "\\."))
 
-# plot(gcon, layout = layout_with_gem, vertex.color = colorlist[as.factor(V(gcon)$topic)], edge.width = E(gcon)$weight/10)
-
-# Set the size parameter (the size of the nodes will depend on the value of this parameter)
-# Increase this value if you want bigger nodes
-
-inches <- 0.05
-
-# Choose the variable to which the size of the circles should be proportional
-var <- strength(gtop)
-
-# Fix the surface of the largest circle
-smax <- inches * inches * pi
-
-# Fix the radius of the circles
-# we multiply by 200 because the igraph package divides, by default, 
-# radius value per 200 (version 1.2.4.1)
-
-siz <- sqrt((var * smax/max(var))/pi)
-size <- siz*200
-
-# Set the size of the circles
-V(gtop)$size <- size
-
-# Select the values of the 4 sizes of circles that will be represented in the legend
-varvect <- seq(max(var), min(var), length.out = 4)
-
-# Set the width of the largest flow
-maxsize <- 10 
-
-# Set the link thickness
-E(gtop)$width <-((E(gtop)$weight/max(E(gtop)$weight))*maxsize)
-
-# Set the thresholds and link thicknesses that will be represented in the legend
-
-# 1. Select 5 values between min. and max. val.
-breaks.edge <- seq(max(E(gtop)$weight), min(E(gtop)$weight), length.out = 5)
-
-# 2. list of thicknesses of the links appearing in the legend
-lwd.edge <- ((breaks.edge[1:4]/max(E(gtop)$weight))*maxsize)
-
-ldh <- layout_with_gem(gtop)
-
-# Generate a new plot
-plot.new()
-
-# Save the original graphic settings
-opar <- par()
-
 # Activate the following line if you want a pdf or svg output
-# svg(file="plots/Topics_network_recoded.svg", width = 8, height= 6)
 
-# Generate a new plot
-plot.new()
+# svg(file = "plots/Topics_network_recoded_cartigraph.svg", width = 8, height= 6)
 
-# Normalize the space in which the vertices are positioned 
-ln <- norm_coords(ldh, ymin=-1, ymax=1, xmin=-1, xmax=1)
+# plot_g <- cartigraph::cartigraph(gtop, inches = 0.05, legend.title.nodes = "Nb of communications\n", 
+                  #     layout = layout_with_gem(gtop), 
+                  #     values.rnd.links = 0, legend.title.links = "Nb of joint communications",
+                  #     title = "", # Network of links between thematic sessions
+                  #     col.nodes = colorlist[as.factor(V(gtop)$rtopic)], frame = F
+                  #    ) # change to vertex.label.cex = 0.7 when possible
 
-# Setting new graphic parameters
- par(mar = c(0,0,1.2,0), usr = c(-1.2,1.2,-1.2,1.2)) # -1.8,1.8,-1.8,1.8 ## xmin, xmax, ymin, et ymax
-
-# Adjust the size parameter of the legend circles ({cartography} package)
-# taking into account the selected graphic parameters
-
-xinch <- diff(par("usr")[1L:2])/par("pin")[1L]
-sizevect <- inches/xinch
-
-# Plot the network and labels of the nodes
-plot(gtop, edge.curved=.1, rescale = F, layout = ln, add = T, main = "", edge.width = E(gtop)$width,
-     vertex.frame.color = "grey",
-     vertex.color = colorlist[as.factor(V(gtop)$rtopic)],
-     vertex.label.family = "sans", # labels' font
-     vertex.label.color = "black", # labels' color
-     vertex.label.degree = -pi/2, # label positioning angle
-     vertex.label.dist = sqrt(V(gtop)$size)/pi +0.2, # distance of labels
-     vertex.label.cex = 0.7) # labels' size
-
-# Add the legend indicating the size of the circles
-legendCirclesSymbols(pos = "topright", title.txt ="Nb of communications",
-                     title.cex = 0.6, values.cex = 0.5,
-                     var = varvect, inches = sizevect, # circles' size
-                     col = "white", frame = F,
-                     style = "e") # choice of "extended" style for better readability
-
-# Add the legend indicating the thickness of the links
-legendGradLines(pos = "topleft", # legend position
-                title.txt = "Nb of joint communications", # legend's title
-                title.cex = 0.6, values.cex = 0.6, # font size
-                breaks = breaks.edge, # intervals of the displayed values
-                lwd = lwd.edge, # link thickness
-                col = "gray80", # link color
-                values.rnd = 0, # number of digits after the decimal point
-                frame = F) # legend's frame
+# plot(gcon, layout = layout_with_gem, vertex.color = colorlist[as.factor(V(gcon)$topic)], edge.width = E(gcon)$weight/10)
 
 # activate the following line if you want to clean up the graphics window
 # dev.off()
 
+knitr::include_graphics("plots/Topics_network_recoded_cartigraph.svg") # afficher la figure
+
 ```
+
+
+
 ```{r ,  echo = FALSE, message = F, warning = F}
 
 
