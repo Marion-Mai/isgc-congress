@@ -5,6 +5,12 @@
 # Data
 /data/
 
+# Archive
+/archive/
+
+# File
+nul
+
 # Session Data files
 .RData
 
