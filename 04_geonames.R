@@ -215,4 +215,55 @@ c %>%
 
 citiesdf <- read_rds(citiesdf)
 
+# 2015 data
+
+# the following code has not been updated: it was valid for 2017 and 2019 only --> we might find other issues with 2015 data #
+
+# load all communications included in the programme + authors' addresses of these com for 2017 and 2019
+f <- read_tsv("data-net/edges-2015-2019.tsv") %>%
+  filter(year == 2015)
+
+country <- tibble(country = f$country) %>%
+  distinct()%>%
+  purrr::map_df(str_subset, "\\w+") %>% #  |  "\\d+"
+  purrr::map_df(str_subset, "\\D+") %>%
+  dplyr::arrange() %>%
+  left_join(recipe %>%
+              mutate(country = str_to_title(country_src)))
+
+countrydf <- "data/geonames-countries_2015.tsv"
+
+if (!file.exists(countrydf)) {
+  
+  country %>%
+    filter(is.na(ISO2_dest)) %>%
+    split(.$country) %>%
+    map( ~ GNsearch(name = .x$country, featureCode = "PCLI", fuzzy = 1)) %>%
+    compact() %>%
+    map_dfr(~ .x %>% as_tibble(), .id = "country")  %>% # (.)
+    full_join(country, by = c("country" = "country")) %>% #"country_src"
+    rename(ISO2 = countryCode,
+           countryname = countryName) %>%
+    select(country, countryname, ISO2)%>%
+    distinct() %>%
+    filter(is.na(countryname)) %>%
+    write_tsv("data/geonames-countries_2015.tsv")
+  # write_rds("data/geonames-countries.rds")
+  
+}
+
+res <- read_tsv(countrydf) %>%
+  filter(!is.na(countryname)) %>%
+  group_by(country) %>%
+  slice(ifelse(country %in% c("IRELAND"), 2, 1)) %>%
+  distinct() %>%
+  mutate(country_src = str_to_upper(country)) %>%
+  rename(ISO2_dest = ISO2,
+         country_dest = countryname) %>%
+  ungroup() %>%
+  select(-c(country)) %>%
+  bind_rows(recipe)
+
+write_tsv(res, "data/geonames-recipe-countries.tsv")
+recipe <- read_tsv("data/geonames-recipe-countries.tsv")
 
