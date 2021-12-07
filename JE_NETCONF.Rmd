@@ -3,8 +3,8 @@ title: "JE_NETCONF"
 author: "Marion Maisonobe"
 date: "07/12/2021"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -373,6 +373,8 @@ d %>%
 evol_pays <- d %>%
   distinct(country_dest, year) %>%
   count(year)
+
+evol_pays
 
 ```
 
