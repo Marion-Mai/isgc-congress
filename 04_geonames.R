@@ -112,9 +112,9 @@ unfoundr %>%
 rclean <- read_tsv(countrydf2) %>% filter(!country_src %in% c("CEDEX", "FR", "MILANO")) %>% # check "GERMANY/FRANCE" - one lines for two addresses -->
                                                                                   # I later include two rows in the recipe table: GERMANY/FRANCE --> GERMANY and GERMANY/FRANCE --> FRANCE
   group_by(country_src) %>%
-  slice(ifelse(!(country_src %in% c("MADRID", "TAIWAN, R.O.C.", "THE NETHERLAND", "WA")), 1,
+  slice(ifelse(!(country_src %in% c("MADRID", "TAIWAN, R.O.C.", "THE NETHERLAND", "WA", "N IRELAND, UK")), 1,
                ifelse((country_src %in% c("TAIWAN, R.O.C.", "THE NETHERLAND")), 2,
-                      ifelse((country_src %in% c("N IRELAND, UK", "N IRELAND, UK")), 3,
+                      ifelse((country_src %in% c("N IRELAND, UK", "N IRELAND, UK")), 4,
                              7)))) %>%
   distinct() %>%
   mutate(countryname = replace(countryname, country_src %in% c("P. R. CHINA", 
@@ -255,7 +255,7 @@ if (!file.exists(countrydf)) {
 res <- read_tsv(countrydf) %>%
   filter(!is.na(countryname)) %>%
   group_by(country) %>%
-  slice(ifelse(country %in% c("IRELAND"), 2, 1)) %>%
+  slice(ifelse(country %in% c("Ireland"), 2, 1)) %>%
   distinct() %>%
   mutate(country_src = str_to_upper(country)) %>%
   rename(ISO2_dest = ISO2,

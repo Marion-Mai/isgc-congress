@@ -36,7 +36,7 @@ authors_abstracts <- read_tsv("data-net/edges-2015-2019.tsv")
 
 d <- authors_abstracts  %>%
   mutate(year = as.numeric(year)) %>%
-  filter(final_status %in% c("OC","FC", "FC - PC", "OC - PC")) %>%
+  # filter(final_status %in% c("OC","FC", "FC - PC", "OC - PC")) %>%
   left_join(select(abstracts, Idu, topic_1), by = "Idu" ) %>%
      group_by(Idu) %>%
      mutate(a_id = cur_group_id())  %>% ungroup()  %>% 
@@ -182,7 +182,6 @@ bind_cols(t1, t2[,-1], t3[,-1], t[,-1]) %>%
 
 recipe <- read_tsv("data/geonames-recipe-countries.tsv")
 
-
 countrydf <- "data/missing_country.tsv"
 
 if (!file.exists(countrydf)) {
@@ -197,11 +196,26 @@ d %>%
 
 d <- d %>%
   left_join(read_tsv(countrydf), 
-            by = c("institution", "a_id", "country")) %>%
+            by = c("institution", "a_id")) %>%
   mutate(country = str_to_upper(country)) %>%
   left_join(select(recipe, -ISO2_dest), by = c("country" = "country_src")) %>%
   mutate(country_dest = coalesce(country_dest.x, country_dest.y)) %>%
   select(-c(country_dest.x, country_dest.y))
+
+
+test <- d %>% 
+  distinct(first_name, family_name, init, middle, institution, address, zipcode, city, country_dest) %>%
+  arrange(family_name) %>%
+  write_tsv("data/participants_affiliations.tsv")
+
+test_city <- d %>% 
+  mutate(institution = str_to_upper(institution),
+         address = str_to_upper(address),
+         city = str_to_upper(city)) %>%
+  distinct(institution, address, zipcode, city, country_dest) %>%
+  arrange(institution) %>%
+  write_tsv("data/affiliations.tsv")
+  
 
 nb_pays <- d %>%
   distinct(a_id, country_dest) %>%

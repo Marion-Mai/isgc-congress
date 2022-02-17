@@ -4708,7 +4708,7 @@ Idu	year	id	title	firstname	lastname	email	j	author_type	is_corresponding	final_
 1232	2015	348	NA	Jean	Le Bras	1835	2015_23_2	other	NA	FC	Institut de Chimie moléculaire de Reims-UMR CNRS 7312	Université de Reims Champagne-Ardenne, UFR des Sciences Exactes et Naturelles, Reims 51100 (France)	NA	Reims	France	JEAN, LE BRAS	JEAN	LE BRAS	J	NA
 1232	2015	348	NA	Jacques	Muzart	1726	2015_23_2	other	NA	FC	Institut de Chimie moléculaire de Reims-UMR CNRS 7312	Université de Reims Champagne-Ardenne, UFR des Sciences Exactes et Naturelles, Reims 51100 (France)	NA	Reims	France	JACQUES, MUZART	JACQUES	MUZART	J	NA
 1233	2015	350	NA	Prince	Amaniampong	3212	2015_6_3	presenting	NA	FC	Nanyang Technological University	62 Nanyang Drive	NA	Singapore	Singapore	PRINCE, AMANIAMPONG	PRINCE	AMANIAMPONG	P	NA
-1233	2015	350	NA	Wang	Bo	3990	2015_6_3	other	NA	FC	Institute of Chemical and Engineering Sciences	1 Pesek road, Jurong Island	NA	Singapore	Singapore	WANG, BO	WANG	BO	W	NA
+1233	2015	350	NA	Wang	Bo	3990	2015_6_3	other	NA	FC	Institute of Chemical and Engineering Sciences	1 Pesek road, Jurong Island	NA	Singapore	Singapore	BO, WANG	BO	WANG	B	NA
 1233	2015	350	NA	Armando	Borgna	396	2015_6_3	other	NA	FC	Institute of Chemical and Engineering Sciences	1 Pesek road, Jurong Island	NA	Singapore	Singapore	ARMANDO, BORGNA	ARMANDO	BORGNA	A	NA
 1233	2015	350	NA	Yanhui	Yang	4091	2015_6_3	other	NA	FC	Nanyang Technological University	62 Nanyang Drive	NA	Singapore	Singapore	YANHUI, YANG	YANHUI	YANG	Y	NA
 1234	2015	351	NA	Harry	Bitter	1542	2015_38_3	presenting	NA	OC	Wageningen University	P.O. Box 17, 6700 AA	NA	Wageningen	Netherlands	JOHANNES HENDRIK, BITTER	JOHANNES HENDRIK	BITTER	J	NA
