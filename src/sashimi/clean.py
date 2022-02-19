@@ -1,5 +1,29 @@
 #!/usr/bin/env python
 
+"""
+TODO:
+- [ ] trouver les abstracts avec une ligne auteurs
+- [x] ajouter une variable si l'abstract a été modifié ou pas
+
+List of abstracts with some issue:
+
+- 187, 661 (longuer de la ligne pas des majuscules)
+- 1610 - trop de chiffres
+- 1340, 1634, 1642 (ligne trop courte)
+- 315, 873 biblio mais il y a l'année (ou DOI)
+- 871 :P
+- 1028 'authors acknowledge...'
+- 1314 biblio sans année
+- 'Abstract: ...' peut-être assouplir le critère (sans \n)
+- 871 (table ronde), 1401
+-- Majuscules (peut-être pas tous):
+- 978, 1161 formule chimique pleine de majuscules
+- 1205 ligne d'abstract avec majuscules
+- 1701 plein d'acronymes
+- première ligne toute en majuscule
+
+"""
+
 import re
 import pandas as pd
 from difflib import unified_diff
@@ -21,6 +45,8 @@ def clean_text(df):
     unwanted_res = "^Lorem ipsum dolor sit amet"
     b_unwanted = df["abstract_text"].str.contains(unwanted_res)
     clean_df = df[~b_unwanted]
+    b_unwanted = df["abstract_text"].map(len).lt(100)
+    clean_df = df[~b_unwanted]
 
     # Section names to be removed
     section_names_res = [
@@ -29,6 +55,7 @@ def clean_text(df):
         r"discussions?",
         r"experiments?",
         r"experimental",
+        r"intro",
         r"introductions?",
         r"materials?",
         r"methods?",
@@ -37,7 +64,9 @@ def clean_text(df):
         r"prospects?",
         r"objectives?",
         r"outlooks?",
+        r"overview?",
         r"results?",
+        r"key\ results?",
         r"significance",
         r"summary",
     ]
@@ -48,7 +77,7 @@ def clean_text(df):
     section_numbering_re = r"[^\n\w]* (?: \d? [^\n\w]* )"
     # Remove invalid content from entries
     unclean_from_start_of_text_res = [
-        r"(?: ^ | .* \n)" + section_numbering_re + r"abstract (?: [^\n\w,]* \n)",
+        r"(?: ^ | .* \n)" + section_numbering_re + r"abstract [^\n\w,]* [\n:]",
     ]
     unclean_res = [
         r"^" + section_numbering_re + r"keys?\ ?words? (?: [^\n\w]* \n )? [^\n]*",
@@ -59,7 +88,7 @@ def clean_text(df):
         + r") (?: \ * section)? (?: [^\n\w]* \n | \s* [^\n\w\s,&]+ )",
     ]
     unclean_until_end_of_text_res = [
-        r"^" + section_numbering_re + r"ac?knowled?ge?ments? :? .*",
+        r"^" + section_numbering_re + r"ac?knowled?ge?m?ents? :? .*",
         r"^" + section_numbering_re + r"r[eé]f[eé]rences? \s* :? .*",
         r"^ [^\n\w]* [12] [^\n\w]+ \w [^\n]+ (?<!\d)(?:1[6789]|20)[0-9]{2}(?!\d) .*",
     ]
@@ -86,6 +115,22 @@ def clean_text(df):
     )
 
     return clean_abstract_text
+
+    # TODO: find use for these
+    def count_upper(line):
+        line = re.sub(r"[^\w\s]", "", line)
+        words = line.split()
+        upper = [x for x in words if x[0].isupper()]
+        return len(words) > 5 and len(upper) / len(words) > 1 / 2
+
+    def remove_upper_and_email_lines(txt):
+        newtxt = []
+        for line in txt.split("\n"):
+            if not count_upper(line) and not re.search(r"[\w-]+@[\w-]+\.[\w-]+", line):
+                newtxt.append(line)
+        return "\n".join(newtxt)
+
+
 
 
 def check_clean(df_or_series, clean_abstract_text, start=0, interactive=True):
