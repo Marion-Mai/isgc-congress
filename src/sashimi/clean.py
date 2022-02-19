@@ -117,20 +117,20 @@ def clean_text(df):
     return clean_abstract_text
 
     # TODO: find use for these
-    def count_upper(line):
+    def long_and_mostly_titlecased(line):
         line = re.sub(r"[^\w\s]", "", line)
         words = line.split()
         upper = [x for x in words if x[0].isupper()]
         return len(words) > 5 and len(upper) / len(words) > 1 / 2
 
-    def remove_upper_and_email_lines(txt):
+    def remove_lines_like_authors(txt):
         newtxt = []
         for line in txt.split("\n"):
-            if not count_upper(line) and not re.search(r"[\w-]+@[\w-]+\.[\w-]+", line):
+            if not long_and_mostly_titlecased(line) and not re.search(
+                r"[\w-]+@[\w-]+\.[\w-]+", line
+            ):
                 newtxt.append(line)
         return "\n".join(newtxt)
-
-
 
 
 def check_clean(df_or_series, clean_abstract_text, start=0, interactive=True):
