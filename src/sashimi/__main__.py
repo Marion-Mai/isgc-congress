@@ -22,6 +22,7 @@ def main():
         check_clean(unclean, clean["abstract_text"], START)
     elif ACTION == "sashimi":
         import sashimi
+
         try:
             a = sashimi.load()
         except FileNotFoundError:

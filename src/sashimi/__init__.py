@@ -52,7 +52,10 @@ def get_data(file_paths, clean=True):
     print(f" Kept {len(df)} entries containing an abstract.")
     
     if clean:
-        df["abstract_text"] = clean_text(df)
+        clean_abstract_text = clean_text(df)
+        df["_abstract_text_is_cleaned"] = ~df["abstract_text"].eq(clean_abstract_text)
+        df["abstract_text"] = clean_abstract_text
+
         df = df.dropna(subset=["abstract_text"])
         print(f" Kept {len(df)} entries after cleaning.")
 
