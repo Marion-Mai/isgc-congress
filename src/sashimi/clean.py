@@ -116,22 +116,50 @@ def clean_text(df):
 
     return clean_abstract_text
 
-    # TODO: find use for these
-    def long_and_mostly_titlecased(line):
-        line = re.sub(r"[^\w\s]", "", line)
-        words = line.split()
-        upper = [x for x in words if x[0].isupper()]
-        return len(words) > 5 and len(upper) / len(words) > 1 / 2
 
-    def remove_lines_like_authors(txt):
-        newtxt = []
-        for line in txt.split("\n"):
-            if not long_and_mostly_titlecased(line) and not re.search(
-                r"[\w-]+@[\w-]+\.[\w-]+", line
-            ):
-                newtxt.append(line)
-        return "\n".join(newtxt)
+# TODO: find a use for these in clean_text()?
+def is_author_affiliation(line, verbose=False):
+    author_words = r"and of at in de et und".split()
+    words_re = fr'\b(?:{"|".join(author_words)})\b'
+    line = re.sub(r"[-\.]", " ", line)
+    line = re.sub(r",", " , ", line)
+    line = re.sub(r"\d+", "", line)
+    line = re.sub(r"[^\w\s,]*|\b[a-z]\b", "", line)
+    words = line.split()
+    point_words = [
+        x for x in words if x[0].isupper() or x == "," or re.match(words_re, x)
+    ]
+    if verbose:
+        print(point_words)
+        print(words)
+    return len(words) > 4 and len(point_words) / len(words) > 0.8
 
+
+def is_email_address(line):
+    return re.search(r"[\w-]+@[\w-]+\.[\w-]+", line)
+
+
+def has_author_affiliation(txt):
+    split = int(len(txt) / 2)
+    txts = txt[:split].split("\n")[:-1]
+    for line in txts:
+        if is_author_affiliation(line) or is_email_address(line):
+            return True
+    return False
+
+
+def remove_lines_like_authors(txt):
+    newtxt = []
+    split = int(len(txt) / 2)
+    txts = txt[:split].split("\n")
+    tail = [txts.pop()]
+    for line in txts:
+        if not is_author_affiliation(line) and not is_email_address(line):
+            newtxt.append(line)
+    return "\n".join(newtxt + tail) + txt[split:]
+
+
+## Interactive
 
 def check_clean(df_or_series, clean_abstract_text, start=0, interactive=True):
     """Compares two textual series showing diffs for each entry.
