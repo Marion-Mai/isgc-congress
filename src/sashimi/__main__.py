@@ -20,6 +20,7 @@ def main():
         clean = get_data(ISGC_FILES, True)
         clean.to_csv(CLEAN_FILE)
         check_clean(unclean, clean["abstract_text"], START)
+
     elif ACTION == "sashimi":
         import sashimi
 
@@ -30,4 +31,5 @@ def main():
         sashimi.plot(a)
 
 
-main()
+if __name__ == "__main__":
+    main()

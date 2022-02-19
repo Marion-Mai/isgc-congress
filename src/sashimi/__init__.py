@@ -39,25 +39,24 @@ from .clean import clean_text
 """
 
 
-def get_data(file_paths, clean=True):
+def get_data(file_paths, clean=True, drop=True):
     df = pd.concat(
-        [
-            pd.read_csv(file, sep="\t", dtype=str)
-            for file in file_paths
-        ],
+        [pd.read_csv(file, sep="\t", dtype=str) for file in file_paths],
         ignore_index=True,
     )
     print(f"Found {len(df)} entries.")
-    df = df.dropna(subset=["abstract_text"])
-    print(f" Kept {len(df)} entries containing an abstract.")
-    
+    if drop:
+        df = df.dropna(subset=["abstract_text"])
+        print(f" Kept {len(df)} entries containing an abstract.")
+
     if clean:
         clean_abstract_text = clean_text(df)
         df["_abstract_text_is_cleaned"] = ~df["abstract_text"].eq(clean_abstract_text)
         df["abstract_text"] = clean_abstract_text
 
-        df = df.dropna(subset=["abstract_text"])
-        print(f" Kept {len(df)} entries after cleaning.")
+        if drop:
+            df = df.dropna(subset=["abstract_text"])
+            print(f" Kept {len(df)} entries after cleaning.")
 
     df.index.name = "index"
     return df
