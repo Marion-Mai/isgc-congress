@@ -55,7 +55,7 @@ def get_data(file_paths, clean=True, drop=True):
         df["abstract_text__has_authors"] = df["abstract_text"].map(clean_m.has_authors)
         clean_abstract_text = clean_m.clean_text(df)
         df["abstract_text__is_cleaned"] = ~df["abstract_text"].eq(clean_abstract_text)
-        df["abstract_text"] = clean_abstract_text
+        df["abstract_text__cleaned"] = clean_abstract_text
         print(f" Cleaned {df['abstract_text__is_cleaned'].sum()} entries.")
 
         if drop:

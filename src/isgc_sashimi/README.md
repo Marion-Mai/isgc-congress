@@ -10,7 +10,11 @@ Then...
 
 `python -m isgc_sashimi ${PATH_TO_DATA_DIR}`
 
-cleans data and outputs `isgc_2015-2019_clean.csv.xz`.
+cleans data and outputs `isgc_2015-2019_clean.csv.xz`, with new columns:
+
+- abstract_text__cleaned
+- abstract_text__is_cleaned
+- abstract_text__has_authors
 
 `python -m isgc_sashimi ${PATH_TO_DATA_DIR} check_clean`
 
