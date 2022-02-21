@@ -56,6 +56,7 @@ def get_data(file_paths, clean=True, drop=True):
         clean_abstract_text = clean_m.clean_text(df)
         df["abstract_text__is_cleaned"] = ~df["abstract_text"].eq(clean_abstract_text)
         df["abstract_text"] = clean_abstract_text
+        print(f" Cleaned {df['abstract_text__is_cleaned'].sum()} entries.")
 
         if drop:
             df = df.dropna(subset=["abstract_text"])
