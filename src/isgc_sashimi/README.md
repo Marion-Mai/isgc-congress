@@ -8,21 +8,21 @@ First, add the folder containing this module to your $PYTHON_PATH:
 
 Then...
 
-`python -m ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR}`
+`python -m isgc_sashimi ${PATH_TO_DATA_DIR}`
 
 cleans data and outputs `isgc_2015-2019_clean.csv.xz`.
 
-`python -m ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} check_clean`
+`python -m isgc_sashimi ${PATH_TO_DATA_DIR} check_clean`
 
 in addition, interactively displays what was cleaned.
 
-`python -m ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} check_clean ${START}`
+`python -m isgc_sashimi ${PATH_TO_DATA_DIR} check_clean ${START}`
 
 starts displaying changes from index ${START}.
 
 ## Requires Python modules `abstractology` and `graph-tool`:
 
-`python -m ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} sashimi`
+`python -m isgc_sashimi ${PATH_TO_DATA_DIR} sashimi`
 
 - cleans data and outputs `isgc_2015-2019_clean.csv.xz`.
 - produces a domain-topic model of the data
