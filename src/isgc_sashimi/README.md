@@ -24,13 +24,16 @@ in addition, interactively displays what was cleaned.
 
 starts displaying changes from index ${START}.
 
-## Requires Python modules `abstractology` and `graph-tool`:
+## Domain-topic modeling (SASHIMI)
+
+Requires Python modules `abstractology` and `graph-tool`.
 
 `python -m isgc_sashimi ${PATH_TO_DATA_DIR} sashimi`
+
+will do the following, in sequence:
 
 - cleans data and outputs `isgc_2015-2019_clean.csv.xz`.
 - produces a domain-topic model of the data
 - plots a domain-topic map
 - produces chained models for time ('year') and conference topic ('topic_1')
 - plots the respective domain-chained maps
-
