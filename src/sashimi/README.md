@@ -1,20 +1,28 @@
-# Running as as script
+# Running the module as as script
 
-`python ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR}`
+First, add the folder containing this module to your $PYTHON_PATH:
+
+`PATH_TO_PARENT_DIR=/home/user/projects/isgc-congress/src`
+
+`export PYTHONPATH=$PYTHONPATH:${PATH_TO_PARENT_DIR}`
+
+Then...
+
+`python -m ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR}`
 
 cleans data and outputs `isgc_2015-2019_clean.csv.xz`.
 
-`python ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} check_clean`
+`python -m ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} check_clean`
 
 in addition, interactively displays what was cleaned.
 
-`python ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} check_clean ${START}`
+`python -m ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} check_clean ${START}`
 
 starts displaying changes from index ${START}.
 
 ## Requires Python modules `abstractology` and `graph-tool`:
 
-`python ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} sashimi`
+`python -m ${PATH_TO_THIS_MODULE} ${PATH_TO_DATA_DIR} sashimi`
 
 - cleans data and outputs `isgc_2015-2019_clean.csv.xz`.
 - produces a domain-topic model of the data
