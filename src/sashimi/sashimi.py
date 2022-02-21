@@ -1,54 +1,51 @@
 #!/usr/bin/env python
 
-import graph_tool  # not used, but avoids an import order bug
+import graph_tool  # not used, but avoids an import order bug # noqa
 import abstractology
 from . import get_data
 
-graph_tool  # just so the linter won't complain
-
-
-def _load_data(a, get_data=get_data):
-    a.data = get_data()
-    corpus_name = "isgc_2015-2017.df"
-    if corpus_name not in a.loaded["data"]:
-        a.loaded["data"].append(corpus_name)
-        a.col_title = "abstract_title"
-        a.col_time = "year"
-        a.text_source = "abstract_text"
-    a.process_corpus(ngrams=1)  # no ngrams while I don't fix gensim on guix
+CORPUS_NAME = "isgc_2015-2017"
 
 
 def bootstrap():
-    a = abstractology.Graphology()
-    _load_data(a)
-    a.load_domain_topic_model()
-    a.set_graph(extend={"prop": "year"})
-    a.load_domain_chained_model()
-    a.set_graph(extend={"prop": "topic_1"})
-    a.load_domain_chained_model()
-    a.register_config()
+    corpus = abstractology.Graphology()
+    corpus.text_source = "abstract_text"
+    corpus.col_title = "abstract_title"
+    corpus.col_time = "year"
+    _load_data(corpus)
 
-    return a
+    corpus.load_domain_topic_model()
+    corpus.set_graph(extend={"prop": "year"})
+    corpus.load_domain_chained_model()
+    corpus.set_graph(extend={"prop": "topic_1"})
+    corpus.load_domain_chained_model()
+
+    corpus.register_config()
+    return corpus
 
 
 def load():
-    a = abstractology.Graphology(
+    corpus = abstractology.Graphology(
         config="auto_abstractology/reports/config.json",
         load_data=False,
     )
-    _load_data(a)
+    _load_data(corpus)
+    return corpus
 
-    return a
+
+def plot(corpus):
+    corpus.load_domain_topic_model()
+    corpus.domain_map("ISGC 2015-2017")
+
+    corpus.set_graph(extend={"prop": "year"})
+    corpus.load_domain_chained_model()
+    corpus.domain_map("ISGC 2015-2017", chained=True)
+
+    corpus.set_graph(extend={"prop": "topic_1"})
+    corpus.load_domain_chained_model()
+    corpus.domain_map("ISGC 2015-2017", chained=True)
 
 
-def plot(a):
-    a.load_domain_topic_model()
-    a.plot_sashimi("ISGC 2015-2017")
-
-    a.set_graph(extend={"prop": "year"})
-    a.load_domain_chained_model()
-    a.plot_sashimi("ISGC 2015-2017", chained=True)
-
-    a.set_graph(extend={"prop": "topic_1"})
-    a.load_domain_chained_model()
-    a.plot_sashimi("ISGC 2015-2017", chained=True)
+def _load_data(corpus):
+    corpus.load_data(get_data(), "dataframe", name=CORPUS_NAME)
+    corpus.process_corpus(ngrams=1)  # no ngrams while I don't fix gensim on guix

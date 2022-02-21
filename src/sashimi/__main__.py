@@ -22,13 +22,13 @@ def main():
         check_clean(unclean, clean["abstract_text"], START)
 
     elif ACTION == "sashimi":
-        import sashimi
+        from . import sashimi
 
         try:
-            a = sashimi.load()
+            corpus = sashimi.load()
         except FileNotFoundError:
-            a = sashimi.bootstrap()
-        sashimi.plot(a)
+            corpus = sashimi.bootstrap()
+        sashimi.plot(corpus)
 
 
 if __name__ == "__main__":
