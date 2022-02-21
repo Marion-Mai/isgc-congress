@@ -1,7 +1,9 @@
 #! /usr/bin/env python
 
 import pandas as pd
-from .clean import clean_text
+
+from . import clean as clean_m
+
 
 """ NOTES
 
@@ -50,8 +52,9 @@ def get_data(file_paths, clean=True, drop=True):
         print(f" Kept {len(df)} entries containing an abstract.")
 
     if clean:
-        clean_abstract_text = clean_text(df)
-        df["_abstract_text_is_cleaned"] = ~df["abstract_text"].eq(clean_abstract_text)
+        df["abstract_text__has_authors"] = df["abstract_text"].map(clean_m.has_authors)
+        clean_abstract_text = clean_m.clean_text(df)
+        df["abstract_text__is_cleaned"] = ~df["abstract_text"].eq(clean_abstract_text)
         df["abstract_text"] = clean_abstract_text
 
         if drop:

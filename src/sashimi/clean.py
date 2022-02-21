@@ -139,7 +139,7 @@ def is_email_address(line):
     return re.search(r"[\w-]+@[\w-]+\.[\w-]+", line)
 
 
-def has_author_affiliation(txt):
+def has_authors(txt):
     split = int(len(txt) / 2)
     txts = txt[:split].split("\n")[:-1]
     for line in txts:
